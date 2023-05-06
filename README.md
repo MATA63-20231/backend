@@ -2,8 +2,6 @@
 
 Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-20231/geral.
 
-# Backend
-[TODO]
 
 ## Tecnologias
 [TODO]
