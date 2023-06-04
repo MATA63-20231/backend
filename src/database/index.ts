@@ -1,28 +1,29 @@
+import 'dotenv/config'
 import 'reflect-metadata'
 import { DataSource } from 'typeorm'
 
+/*const host = process.env.DB_HOST
+const database = process.env.DB_NAME
+const username = process.env.USERNAME
+const port = process.env.DB_PORT as number | undefined
+const password = process.env.DB_PASSWORD as string | undefined*/
+
 const host = 'localhost'
 const port = 3306
-const database = 'receitas' //process.env.PROJECT_NAME
-const username = 'root' //process.env.USERNAME
-const password = undefined //process.env.PASSWORD
+const database = 'receitas'
+const username = 'root'
+const password = undefined
 
-const AppDataSource = new DataSource({
+export const AppDataSource = new DataSource({
   type: 'mysql',
   host: host,
   port: port,
   username: username,
   password: password,
   database: database,
-  synchronize: true,
+  synchronize: false, //True só em ambiente de desenvolvimento
   logging: false,
-  entities: [],
+  entities: [`./src/models/*.{ts,js}`],
   subscribers: [],
-  migrations: [],
+  migrations: [`${__dirname}/**/migrations/*.{ts,js}`],
 })
-
-AppDataSource.initialize()
-  .then(async () => {
-    console.log(`Connected to ${database} database`)
-  })
-  .catch(error => console.log(error))
