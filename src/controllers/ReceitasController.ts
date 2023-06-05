@@ -6,9 +6,15 @@ import Receita from '../models/Receita'
 import Preparo from '../models/Preparo'
 import preparoRepository from '../repositories/preparoRepository'
 
+type createReceitaDTO = Omit<Omit<Receita, 'id'>, 'tempoPreparo'> & {
+  tempoPreparo: {
+    horas: number
+    minutos: number
+  }
+}
+
 type createPreparoDTO = Omit<Preparo, 'id'>
 type createIngredienteDTO = Omit<Ingrediente, 'id'>
-type createReceitaDTO = Omit<Receita, 'id'>
 
 export default class ReceitasController {
   async create(request: Request, response: Response) {
@@ -27,16 +33,27 @@ export default class ReceitasController {
       if (!titulo)
         return response.status(400).json({ message: 'O título é obrigatório ' })
 
-      if (!descricao)
+      if (ingredientes.length < 1)
         return response
           .status(400)
-          .json({ message: 'A descrição é obrigatória ' })
+          .json({ message: 'Cadastro de ingredientes é obrigatório' })
+
+      if (!rendimento || rendimento == 0)
+        return response
+          .status(400)
+          .json({ message: 'O rendimento deve ser superior à 0' })
+
+      let tempoMinutos = 0
+      if (tempoPreparo)
+        tempoMinutos =
+          (tempoPreparo.minutos ? tempoPreparo.minutos : 0) +
+          (tempoPreparo.horas ? tempoPreparo.horas * 60 : 0)
 
       const novaReceita = receitasRepository.create({
         titulo,
         descricao,
         rendimento,
-        tempoPreparo,
+        tempoPreparo: tempoMinutos,
         listaPreparo,
         imagem,
         ingredientes,
@@ -55,9 +72,9 @@ export default class ReceitasController {
 
       //To-do: Entender o motivo do problema no lint da linha abaixo
       let novaListaPreparo: Array<createPreparoDTO> = [] // eslint-disable-line
-      listaPreparo.forEach(preparo => {
+      listaPreparo.forEach((preparo, index) => {
         const novoPreparo: createPreparoDTO = {
-          ordem: preparo.ordem,
+          ordem: index,
           descricao: preparo.descricao,
           receita: novaReceita,
         }
@@ -73,6 +90,35 @@ export default class ReceitasController {
       return response.status(201).json({ receita: novaReceita })
     } catch (error) {
       return response.status(400).json({ Error: 'Parâmetro não informado' })
+    }
+  }
+
+  async findAll(request: Request, response: Response) {
+    try {
+      const receitas = await receitasRepository.find({
+        order: {
+          titulo: 'ASC',
+          id: 'ASC',
+        },
+      })
+      response.status(200).json(receitas)
+    } catch (error) {
+      return response.status(400).json({ Error: 'Falha ao obter receitas' })
+    }
+  }
+
+  async findByTitulo(request: Request, response: Response) {
+    try {
+      const { titulo } = request.body
+
+      const receitas = await receitasRepository.find({
+        where: {
+          titulo: titulo,
+        },
+      })
+      response.status(200).json(receitas)
+    } catch (error) {
+      return response.status(400).json({ Error: 'Falha ao obter receitas' })
     }
   }
 }
