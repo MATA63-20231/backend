@@ -2,17 +2,11 @@ import 'dotenv/config'
 import 'reflect-metadata'
 import { DataSource } from 'typeorm'
 
-/*const host = process.env.DB_HOST
+const host = process.env.DB_HOST
 const database = process.env.DB_NAME
-const username = process.env.USERNAME
+const username = process.env.DB_USER
 const port = process.env.DB_PORT as number | undefined
-const password = process.env.DB_PASSWORD as string | undefined*/
-
-const host = 'localhost'
-const port = 3306
-const database = 'receitas'
-const username = 'root'
-const password = undefined
+const password = process.env.DB_PASSWORD
 
 export const AppDataSource = new DataSource({
   type: 'mysql',
