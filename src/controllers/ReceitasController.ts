@@ -121,4 +121,8 @@ export default class ReceitasController {
       return response.status(400).json({ Error: 'Falha ao obter receitas' })
     }
   }
+
+  async getStatusApi(request: Request, response: Response) {
+    return await response.send("API Online")
+  }
 }

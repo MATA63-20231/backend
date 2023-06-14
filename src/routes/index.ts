@@ -3,6 +3,7 @@ import ReceitasController from '../controllers/ReceitasController'
 
 const routes = Router()
 
+routes.get('/', new ReceitasController().getStatusApi )
 routes.get('/receitas', new ReceitasController().findAll)
 
 routes.get('/receita', new ReceitasController().findByTitulo)
