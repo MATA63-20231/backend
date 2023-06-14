@@ -16,7 +16,8 @@ type createReceitaDTO = Omit<Omit<Receita, 'id'>, 'tempoPreparo'> & {
 type createPreparoDTO = Omit<Preparo, 'id'>
 type createIngredienteDTO = Omit<Ingrediente, 'id'>
 
-export default class ReceitasController {
+class ReceitasController {
+
   async create(request: Request, response: Response) {
     try {
       const {
@@ -121,4 +122,11 @@ export default class ReceitasController {
       return response.status(400).json({ Error: 'Falha ao obter receitas' })
     }
   }
+
+  getStatus(request: Request, response: Response) {
+    return response.status(200).send("API ONLINE");
+  };
+
 }
+
+module.exports = new ReceitasController();

@@ -1,12 +1,12 @@
 import { Router } from 'express'
-import ReceitasController from '../controllers/ReceitasController'
+const ReceitasController = require('../controllers/ReceitasController')
 
 const routes = Router()
 
-routes.get('/receitas', new ReceitasController().findAll)
+routes.get('/', ReceitasController.getStatus)
 
-routes.get('/receita', new ReceitasController().findByTitulo)
-
-routes.post('/receita', new ReceitasController().create)
+routes.get('/receitas', ReceitasController.findAll)
+routes.get('/receita', ReceitasController.findByTitulo)
+routes.post('/receita', ReceitasController.create)
 
 export default routes
