@@ -95,15 +95,18 @@ export default class ReceitasController {
 
   async findAll(request: Request, response: Response) {
     try {
-      const receitas = await receitasRepository.find({
-        order: {
-          titulo: 'ASC',
-          id: 'ASC',
-        },
-      })
+      const receitas = await receitasRepository
+        .createQueryBuilder('receita')
+        .innerJoinAndSelect('receita.ingredientes', 'ingredientes')
+        .innerJoinAndSelect('receita.listaPreparo', 'listaPreparo')
+        .orderBy({
+          dataCadastro: 'ASC',
+          'listaPreparo.ordem': 'ASC',
+        })
+        .getMany()
       response.status(200).json(receitas)
     } catch (error) {
-      return response.status(400).json({ Error: 'Falha ao obter receitas' })
+      return response.status(400).json({ Error: error })
     }
   }
 
@@ -111,14 +114,84 @@ export default class ReceitasController {
     try {
       const { titulo } = request.body
 
-      const receitas = await receitasRepository.find({
-        where: {
-          titulo: titulo,
-        },
-      })
+      const receitas = await receitasRepository
+        .createQueryBuilder('receita')
+        .innerJoinAndSelect('receita.ingredientes', 'ingredientes')
+        .innerJoinAndSelect('receita.listaPreparo', 'listaPreparo')
+        .where('receita.titulo like :titulo', { titulo: `%${titulo}%` })
+        .orderBy({
+          dataCadastro: 'ASC',
+          'listaPreparo.ordem': 'ASC',
+        })
+        .getMany()
       response.status(200).json(receitas)
     } catch (error) {
-      return response.status(400).json({ Error: 'Falha ao obter receitas' })
+      return response.status(400).json({ Error: error })
+    }
+  }
+
+  async findById(request: Request, response: Response) {
+    try {
+      const { id } = request.params
+
+      const receita = await receitasRepository
+        .createQueryBuilder('receita')
+        .innerJoinAndSelect('receita.ingredientes', 'ingredientes')
+        .innerJoinAndSelect('receita.listaPreparo', 'listaPreparo')
+        .where('receita.id = :id', { id: id })
+        .orderBy({
+          dataCadastro: 'ASC',
+          'listaPreparo.ordem': 'ASC',
+        })
+        .getOne()
+
+      if (!receita)
+        return response.status(404).json({ Error: 'Registro não encontrado' })
+
+      response.status(200).json(receita)
+    } catch (error) {
+      return response.status(400).json({ Error: error })
+    }
+  }
+
+  async delete(request: Request, response: Response) {
+    try {
+      const { id } = request.params
+
+      const receita: Receita | null = await receitasRepository.findOne({
+        where: { id },
+      })
+
+      if (!receita)
+        return response.status(404).json({ Error: 'Registro não encontrado' })
+
+      const ingredientes = await ingredientesRepository
+        .createQueryBuilder('ingrediente')
+        .innerJoin('ingrediente.receita', 'receita')
+        .where('ingrediente.receita.id = :idReceita', { idReceita: receita.id })
+        .getMany()
+
+      const listaPreparo = await preparoRepository
+        .createQueryBuilder('preparo')
+        .innerJoin('preparo.receita', 'receita')
+        .where('preparo.receita.id = :idReceita', { idReceita: receita.id })
+        .getMany()
+
+      if (ingredientes)
+        ingredientes.forEach(
+          async ingrediente => await ingredientesRepository.remove(ingrediente)
+        )
+
+      if (listaPreparo)
+        listaPreparo.forEach(
+          async preparo => await preparoRepository.remove(preparo)
+        )
+
+      await receitasRepository.remove(receita)
+
+      response.status(200).json({ Message: 'Receita apagada com sucesso!' })
+    } catch (error) {
+      return response.status(400).json({ Error: error })
     }
   }
 }
