@@ -2,7 +2,11 @@ import { Request, Response } from 'express'
 import { hash, compare } from 'bcryptjs'
 import usuarioRepository from '../repositories/usuariosRepository'
 
-import { createUsuarioDTO, updateSenhaUsuarioDTO } from '../util/types'
+import {
+  createUsuarioDTO,
+  updateSenhaUsuarioDTO,
+  authenticateUsuaroioDTO,
+} from '../util/types'
 import Usuario from '../models/Usuario'
 
 export default class UsuarioController {
@@ -120,6 +124,39 @@ export default class UsuarioController {
       response.status(200).json({ Message: 'Usuario apagado com sucesso!' })
     } catch (error) {
       return response.status(400).json({ Error: error })
+    }
+  }
+
+  async authenticate(request: Request, response: Response) {
+    try {
+      const { usuario, senha }: authenticateUsuaroioDTO = request.body
+
+      if (!usuario)
+        return response.status(400).json({ message: 'Usuário inválido! ' })
+
+      if (!senha) {
+        return response.status(400).json({ message: 'A senha não informada' })
+      }
+
+      const user = await usuarioRepository.findOne({
+        where: {
+          usuario: usuario,
+        },
+      })
+
+      if (!user)
+        return response.status(400).json({ message: 'Usuario não encontrado' })
+
+      const passwordValido = await compare(senha, user.senha)
+
+      if (!passwordValido)
+        return response.status(400).json({ message: 'Senha inválida' })
+
+      return response.status(201).json(true)
+    } catch (error) {
+      return response
+        .status(400)
+        .json({ message: 'Falha na inclusão do usuário!' })
     }
   }
 }

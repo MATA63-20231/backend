@@ -31,3 +31,8 @@ export type updateSenhaUsuarioDTO = {
   novaSenha: string
   confirmacaoSenha: string
 }
+
+export type authenticateUsuaroioDTO = {
+  usuario: string
+  senha: string
+}
