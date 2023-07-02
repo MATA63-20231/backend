@@ -1,20 +1,16 @@
 import { Request, Response } from 'express'
 import receitasRepository from '../repositories/receitasRepository'
 import ingredientesRepository from '../repositories/ingredientesRepository'
-import Ingrediente from '../models/Ingrediente'
 import Receita from '../models/Receita'
-import Preparo from '../models/Preparo'
 import preparoRepository from '../repositories/preparoRepository'
 
-type createReceitaDTO = Omit<Omit<Receita, 'id'>, 'tempoPreparo'> & {
-  tempoPreparo: {
-    horas: number
-    minutos: number
-  }
-}
-
-type createPreparoDTO = Omit<Preparo, 'id'>
-type createIngredienteDTO = Omit<Ingrediente, 'id'>
+import {
+  createReceitaDTO,
+  createIngredienteDTO,
+  createPreparoDTO,
+  responseReceitaDTO,
+} from '../util/types'
+import { convertReceitaToResponseReceita } from '../util/convertToDataType'
 
 export default class ReceitasController {
   async create(request: Request, response: Response) {
@@ -104,7 +100,17 @@ export default class ReceitasController {
           'listaPreparo.ordem': 'ASC',
         })
         .getMany()
-      response.status(200).json(receitas)
+      if (receitas) {
+        const receitasResponse: responseReceitaDTO[] = []
+
+        receitas.forEach(receita => {
+          return receitasResponse.push(convertReceitaToResponseReceita(receita))
+        })
+
+        response.status(200).json(receitasResponse) // eslint-disable-line
+      } else {
+        response.status(200).json([])
+      }
     } catch (error) {
       return response.status(400).json({ Error: error })
     }
@@ -124,7 +130,18 @@ export default class ReceitasController {
           'listaPreparo.ordem': 'ASC',
         })
         .getMany()
-      response.status(200).json(receitas)
+
+      if (receitas) {
+        const receitasResponse: responseReceitaDTO[] = []
+
+        receitas.forEach(receita => {
+          return receitasResponse.push(convertReceitaToResponseReceita(receita))
+        })
+
+        response.status(200).json(receitasResponse) // eslint-disable-line
+      } else {
+        response.status(200).json([])
+      }
     } catch (error) {
       return response.status(400).json({ Error: error })
     }
@@ -148,7 +165,9 @@ export default class ReceitasController {
       if (!receita)
         return response.status(404).json({ Error: 'Registro não encontrado' })
 
-      response.status(200).json(receita)
+      const responseReceita = convertReceitaToResponseReceita(receita)
+
+      response.status(200).json(responseReceita)
     } catch (error) {
       return response.status(400).json({ Error: error })
     }
