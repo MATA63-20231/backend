@@ -4,10 +4,13 @@ import {
   CreateDateColumn,
   PrimaryGeneratedColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm'
 
 import Ingrediente from './Ingrediente'
 import Preparo from './Preparo'
+import Usuario from './Usuario'
 
 @Entity('receita')
 export default class Receita {
@@ -29,10 +32,16 @@ export default class Receita {
   @Column()
   imagem: string
 
-  @OneToMany(() => Ingrediente, ingrediente => ingrediente.receita)
+  @ManyToOne(() => Usuario, { eager: true })
+  @JoinColumn({ name: 'usuario_id' })
+  usuario: Usuario
+
+  @OneToMany(() => Ingrediente, ingrediente => ingrediente.receita, {
+    onDelete: 'CASCADE',
+  })
   ingredientes: Ingrediente[]
 
-  @OneToMany(() => Preparo, preparo => preparo.receita)
+  @OneToMany(() => Preparo, preparo => preparo.receita, { onDelete: 'CASCADE' })
   listaPreparo: Preparo[]
 
   @CreateDateColumn()

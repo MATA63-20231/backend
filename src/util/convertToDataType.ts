@@ -22,6 +22,7 @@ export const convertReceitaToResponseReceita = (receita: Receita) => {
     listaPreparo: receita.listaPreparo,
     imagem: receita.imagem,
     dataCadastro: receita.dataCadastro,
+    usuario: receita.usuario,
   }
 
   return responseReceita

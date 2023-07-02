@@ -12,7 +12,7 @@ export default class Ingrediente {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @ManyToOne(() => Receita, receita => receita.ingredientes)
+  @ManyToOne(() => Receita, receita => receita.ingredientes, { cascade: true })
   @JoinColumn({ name: 'receita_id' })
   receita: Receita
 
