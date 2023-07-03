@@ -39,11 +39,23 @@ export default class ReceitasController {
           .status(400)
           .json({ message: 'O rendimento deve ser superior à 0' })
 
-      let tempoMinutos = 0
-      if (tempoPreparo)
-        tempoMinutos =
-          (tempoPreparo.minutos ? tempoPreparo.minutos : 0) +
-          (tempoPreparo.horas ? tempoPreparo.horas * 60 : 0)
+      if (
+        !tempoPreparo ||
+        (tempoPreparo.minutos <= 0 && tempoPreparo.horas <= 0)
+      )
+        return response
+          .status(400)
+          .json({ message: 'Tempo de preparo deve ser superior à 0' })
+
+      if (tempoPreparo.minutos > 59)
+        return response.status(400).json({
+          message:
+            'Quantidade de minutos para preparo não pode ser à 59 minutos',
+        })
+
+      const tempoMinutos =
+        (tempoPreparo.minutos ? tempoPreparo.minutos : 0) +
+        (tempoPreparo.horas ? tempoPreparo.horas * 60 : 0)
 
       const novaReceita = receitasRepository.create({
         titulo,
@@ -55,17 +67,24 @@ export default class ReceitasController {
         ingredientes,
       })
 
+      if (ingredientes.length <= 0)
+        return response.status(400).json({
+          message: 'Obrigatório o cadastro de ao menos um ingrediente',
+        })
       //To-do: Entender o motivo do problema no lint da linha abaixo
       let novosIngredientes: Array<createIngredienteDTO> = [] // eslint-disable-line
       ingredientes.forEach(ingrediente => {
         const novoIngrediente: createIngredienteDTO = {
-          quantidade: ingrediente.quantidade,
           descricao: ingrediente.descricao,
           receita: novaReceita,
         }
         novosIngredientes.push(novoIngrediente)
       })
 
+      if (listaPreparo.length <= 0)
+        return response.status(400).json({
+          message: 'Obrigatório o cadastro de item para preparo',
+        })
       //To-do: Entender o motivo do problema no lint da linha abaixo
       let novaListaPreparo: Array<createPreparoDTO> = [] // eslint-disable-line
       listaPreparo.forEach((preparo, index) => {
@@ -85,7 +104,7 @@ export default class ReceitasController {
 
       return response.status(201).json({ receita: novaReceita })
     } catch (error) {
-      return response.status(400).json({ Error: 'Parâmetro não informado' })
+      return response.status(400).json({ Error: error })
     }
   }
 

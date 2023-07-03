@@ -16,9 +16,6 @@ export default class Ingrediente {
   @JoinColumn({ name: 'receita_id' })
   receita: Receita
 
-  @Column({ type: 'numeric' })
-  quantidade: number
-
   @Column()
   descricao: string
 }
