@@ -9,6 +9,6 @@ routes.put('/alteracaoSenha', new UsuariosController().updateSenha)
 
 routes.delete('/:id', new UsuariosController().delete)
 
-routes.get('/authenticate', new UsuariosController().authenticate)
+routes.post('/authenticate', new UsuariosController().authenticate)
 
 export default routes
