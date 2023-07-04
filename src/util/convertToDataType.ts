@@ -20,7 +20,7 @@ export const convertReceitaToResponseReceita = (receita: Receita) => {
     tempoPreparo: tempoPreparo,
     ingredientes: receita.ingredientes,
     listaPreparo: receita.listaPreparo,
-    imagem: receita.imagem,
+    imagens: receita.imagens,
     dataCadastro: receita.dataCadastro,
     usuario: receita.usuario,
   }

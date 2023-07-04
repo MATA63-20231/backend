@@ -11,6 +11,7 @@ import {
 import Ingrediente from './Ingrediente'
 import Preparo from './Preparo'
 import Usuario from './Usuario'
+import Imagem from './Imagem'
 
 @Entity('receita')
 export default class Receita {
@@ -29,9 +30,6 @@ export default class Receita {
   @Column({ type: 'numeric' })
   tempoPreparo: number
 
-  @Column()
-  imagem: string
-
   @ManyToOne(() => Usuario, { eager: true })
   @JoinColumn({ name: 'usuario_id' })
   usuario: Usuario
@@ -43,6 +41,11 @@ export default class Receita {
 
   @OneToMany(() => Preparo, preparo => preparo.receita, { onDelete: 'CASCADE' })
   listaPreparo: Preparo[]
+
+  @OneToMany(() => Imagem, imagem => imagem.receita, {
+    onDelete: 'CASCADE',
+  })
+  imagens: Imagem[]
 
   @CreateDateColumn()
   dataCadastro: Date

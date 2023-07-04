@@ -8,6 +8,22 @@ export type createReceitaDTO = Omit<Omit<Receita, 'id'>, 'tempoPreparo'> & {
     horas: number
     minutos: number
   }
+  usuarioId: string
+}
+
+export type createReceitaMultDTO = {
+  titulo: string
+  descricao: string
+  rendimento: number
+  tempoPreparo: string
+  listaPreparo: string
+  ingredientes: string
+}
+
+export type createImageDTO = {
+  receita: Receita
+  ordem: number
+  nome: string
 }
 
 export type responseReceitaDTO = Omit<Receita, 'tempoPreparo'> & {
