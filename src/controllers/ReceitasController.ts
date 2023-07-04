@@ -143,7 +143,7 @@ export default class ReceitasController {
 
       return response.status(201).json(responseReceita)
     } catch (error) {
-      return response.status(400).json({ Error: error })
+      return response.status(400).json({ Error: JSON.stringify(error) })
     }
   }
 
