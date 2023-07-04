@@ -8,7 +8,7 @@ const routes = Router()
 
 routes.post(
   '/:receitaId',
-  upload.array('imagensReceita'),
+  upload.array('imagens'),
   new ImagensController().create
 )
 

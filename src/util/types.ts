@@ -33,6 +33,15 @@ export type responseReceitaDTO = Omit<Receita, 'tempoPreparo'> & {
   }
 }
 
+export type fileType = {
+  originalName: string
+  mimetype: string
+  destination: string
+  filename: string
+  path: string
+  size: number
+}
+
 export type createPreparoDTO = Omit<Preparo, 'id'>
 
 export type createIngredienteDTO = Omit<Ingrediente, 'id'>

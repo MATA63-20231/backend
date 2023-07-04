@@ -21,11 +21,7 @@ routes.get('/', new ReceitasController().findByTitulo)
 
 routes.get('/:id', new ReceitasController().findById)
 
-routes.post(
-  '/',
-  upload.array('imagensReceita'),
-  new ReceitasController().create
-)
+routes.post('/', upload.array('imagens'), new ReceitasController().create)
 
 routes.delete('/:id', new ReceitasController().delete)
 

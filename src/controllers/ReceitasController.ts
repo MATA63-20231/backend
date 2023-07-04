@@ -11,6 +11,7 @@ import {
   createPreparoDTO,
   responseReceitaDTO,
   createImageDTO,
+  fileType,
 } from '../util/types'
 import { convertReceitaToResponseReceita } from '../util/convertToDataType'
 import Ingrediente from '../models/Ingrediente'
@@ -68,7 +69,6 @@ export default class ReceitasController {
         return response.status(400).json({
           message: 'Usuário de cadastro não informado',
         })*/
-
       const novaReceita = receitasRepository.create({
         titulo,
         descricao,
@@ -108,17 +108,10 @@ export default class ReceitasController {
         novaListaPreparo.push(novoPreparo)
       })
 
-      const files = request.files as unknown[] as {
-        originalName: string
-        mimetype: string
-        destination: string
-        filename: string
-        path: string
-        size: number
-      }[]
+      const files = request.files as unknown[] as fileType[]
 
       let novasImagens: Array<createImageDTO> = [] // eslint-disable-line
-      if (files)
+      if (files && files.length > 0) {
         files.forEach((file, index: number) => {
           const novaImagem: createImageDTO = {
             receita: novaReceita,
@@ -127,6 +120,7 @@ export default class ReceitasController {
           }
           novasImagens.push(novaImagem)
         })
+      }
 
       if (novaReceita) await receitasRepository.save(novaReceita)
       if (novaListaPreparo.length > 0)
@@ -139,7 +133,7 @@ export default class ReceitasController {
         .createQueryBuilder('receita')
         .innerJoinAndSelect('receita.ingredientes', 'ingredientes')
         .innerJoinAndSelect('receita.listaPreparo', 'listaPreparo')
-        .innerJoinAndSelect('receita.imagens', 'imagens')
+        .leftJoinAndSelect('receita.imagens', 'imagens')
         .where('receita.id = :id', { id: novaReceita.id })
         .orderBy({
           'receita.dataCadastro': 'ASC',
@@ -159,7 +153,7 @@ export default class ReceitasController {
         .createQueryBuilder('receita')
         .innerJoinAndSelect('receita.ingredientes', 'ingredientes')
         .innerJoinAndSelect('receita.listaPreparo', 'listaPreparo')
-        .innerJoinAndSelect('receita.imagens', 'imagens')
+        .leftJoinAndSelect('receita.imagens', 'imagens')
         .orderBy({
           'receita.dataCadastro': 'ASC',
           'listaPreparo.ordem': 'ASC',
@@ -189,7 +183,7 @@ export default class ReceitasController {
         .createQueryBuilder('receita')
         .innerJoinAndSelect('receita.ingredientes', 'ingredientes')
         .innerJoinAndSelect('receita.listaPreparo', 'listaPreparo')
-        .innerJoinAndSelect('receita.imagens', 'imagens')
+        .leftJoinAndSelect('receita.imagens', 'imagens')
         .where('receita.titulo like :titulo', { titulo: `%${titulo}%` })
         .orderBy({
           'receita.dataCadastro': 'ASC',
@@ -221,7 +215,7 @@ export default class ReceitasController {
         .createQueryBuilder('receita')
         .innerJoinAndSelect('receita.ingredientes', 'ingredientes')
         .innerJoinAndSelect('receita.listaPreparo', 'listaPreparo')
-        .innerJoinAndSelect('receita.imagens', 'imagens')
+        .leftJoinAndSelect('receita.imagens', 'imagens')
         .where('receita.id = :id', { id: id })
         .orderBy({
           'receita.dataCadastro': 'ASC',
@@ -250,28 +244,6 @@ export default class ReceitasController {
 
       if (!receita)
         return response.status(404).json({ Error: 'Registro não encontrado' })
-
-      /*const ingredientes = await ingredientesRepository
-        .createQueryBuilder('ingrediente')
-        .innerJoin('ingrediente.receita', 'receita')
-        .where('ingrediente.receita.id = :idReceita', { idReceita: receita.id })
-        .getMany()
-
-      const listaPreparo = await preparoRepository
-        .createQueryBuilder('preparo')
-        .innerJoin('preparo.receita', 'receita')
-        .where('preparo.receita.id = :idReceita', { idReceita: receita.id })
-        .getMany()
-
-      if (ingredientes)
-        ingredientes.forEach(
-          async ingrediente => await ingredientesRepository.remove(ingrediente)
-        )
-
-      if (listaPreparo)
-        listaPreparo.forEach(
-          async preparo => await preparoRepository.remove(preparo)
-        )*/
 
       await receitasRepository.remove(receita)
 
