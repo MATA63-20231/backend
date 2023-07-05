@@ -32,7 +32,7 @@ export default class ReceitasController {
 
       //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
       if (!titulo)
-        return response.status(400).json({ message: 'O título é obrigatório ' })
+        return response.status(400).json({ message: 'O título é obrigatório.' })
 
       const listaIngredientes =
         typeof ingredientes == 'string'
@@ -41,12 +41,12 @@ export default class ReceitasController {
       if (listaIngredientes.length < 1)
         return response
           .status(400)
-          .json({ message: 'Cadastro de ingredientes é obrigatório' })
+          .json({ message: 'Cadastro de ingredientes é obrigatório.' })
 
       if (!rendimento || rendimento == 0)
         return response
           .status(400)
-          .json({ message: 'O rendimento deve ser superior à 0' })
+          .json({ message: 'O rendimento deve ser superior a 0.' })
 
       const tempo: { minutos: number; horas: number } =
         typeof tempoPreparo == 'string'
@@ -55,12 +55,12 @@ export default class ReceitasController {
       if (!tempo || (tempo.minutos <= 0 && tempo.horas <= 0))
         return response
           .status(400)
-          .json({ message: 'Tempo de preparo deve ser superior à 0' })
+          .json({ message: 'Tempo de preparo deve ser superior a 0.' })
 
       if (tempo.minutos > 59)
         return response.status(400).json({
           message:
-            'Quantidade de minutos para preparo não pode ser à 59 minutos',
+            'Quantidade de minutos para preparo não pode ser superior a 59 minutos.',
         })
 
       const tempoMinutos =
@@ -86,7 +86,7 @@ export default class ReceitasController {
 
       if (ingredientes.length <= 0)
         return response.status(400).json({
-          message: 'Obrigatório o cadastro de ao menos um ingrediente',
+          message: 'Obrigatório o cadastro de ao menos um ingrediente.',
         })
       //To-do: Entender o motivo do problema no lint da linha abaixo
       let novosIngredientes: Array<createIngredienteDTO> = [] // eslint-disable-line
@@ -100,7 +100,7 @@ export default class ReceitasController {
 
       if (listaPreparo.length <= 0)
         return response.status(400).json({
-          message: 'Obrigatório o cadastro de item para preparo',
+          message: 'Obrigatório o cadastro de item para preparo.',
         })
 
       const preparo =
@@ -153,7 +153,7 @@ export default class ReceitasController {
 
       return response.status(201).json(responseReceita)
     } catch (error) {
-      return response.status(400).json({ Error: error })
+      return response.status(400).json({ Error: JSON.stringify(error) })
     }
   }
 
@@ -181,7 +181,7 @@ export default class ReceitasController {
         response.status(200).json([])
       }
     } catch (error) {
-      return response.status(400).json({ Error: error })
+      return response.status(400).json({ Error: JSON.stringify(error) })
     }
   }
 
@@ -213,7 +213,7 @@ export default class ReceitasController {
         response.status(200).json([])
       }
     } catch (error) {
-      return response.status(400).json({ Error: error })
+      return response.status(400).json({ Error: JSON.stringify(error) })
     }
   }
 
@@ -234,13 +234,13 @@ export default class ReceitasController {
         .getOne()
 
       if (!receita)
-        return response.status(404).json({ Error: 'Registro não encontrado' })
+        return response.status(404).json({ Error: 'Registro não encontrado.' })
 
       const responseReceita = convertReceitaToResponseReceita(receita)
 
       response.status(200).json(responseReceita)
     } catch (error) {
-      return response.status(400).json({ Error: error })
+      return response.status(400).json({ Error: JSON.stringify(error) })
     }
   }
 
@@ -253,13 +253,13 @@ export default class ReceitasController {
       })
 
       if (!receita)
-        return response.status(404).json({ Error: 'Registro não encontrado' })
+        return response.status(404).json({ Error: 'Registro não encontrado.' })
 
       await receitasRepository.remove(receita)
 
       response.status(200).json({ Message: 'Receita apagada com sucesso!' })
     } catch (error) {
-      return response.status(400).json({ Error: error })
+      return response.status(400).json({ Error: JSON.stringify(error) })
     }
   }
 }
