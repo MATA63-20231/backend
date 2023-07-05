@@ -34,7 +34,10 @@ export default class ReceitasController {
       if (!titulo)
         return response.status(400).json({ message: 'O título é obrigatório ' })
 
-      const listaIngredientes = JSON.parse(ingredientes)
+      const listaIngredientes =
+        typeof ingredientes == 'string'
+          ? JSON.parse(ingredientes)
+          : ingredientes
       if (listaIngredientes.length < 1)
         return response
           .status(400)
@@ -45,7 +48,10 @@ export default class ReceitasController {
           .status(400)
           .json({ message: 'O rendimento deve ser superior à 0' })
 
-      const tempo: { minutos: number; horas: number } = JSON.parse(tempoPreparo)
+      const tempo: { minutos: number; horas: number } =
+        typeof tempoPreparo == 'string'
+          ? JSON.parse(tempoPreparo)
+          : tempoPreparo
       if (!tempo || (tempo.minutos <= 0 && tempo.horas <= 0))
         return response
           .status(400)
@@ -69,6 +75,7 @@ export default class ReceitasController {
         return response.status(400).json({
           message: 'Usuário de cadastro não informado',
         })*/
+
       const novaReceita = receitasRepository.create({
         titulo,
         descricao,
@@ -96,7 +103,10 @@ export default class ReceitasController {
           message: 'Obrigatório o cadastro de item para preparo',
         })
 
-      const preparo = JSON.parse(listaPreparo)
+      const preparo =
+        typeof listaPreparo == 'string'
+          ? JSON.parse(listaPreparo)
+          : listaPreparo
       //To-do: Entender o motivo do problema no lint da linha abaixo
       let novaListaPreparo: Array<createPreparoDTO> = [] // eslint-disable-line
       preparo.forEach((preparo: Preparo, index: number) => {
