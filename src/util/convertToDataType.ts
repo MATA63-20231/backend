@@ -1,6 +1,44 @@
+import Comentario from '../models/Comentario'
 import Receita from '../models/Receita'
+import Usuario from '../models/Usuario'
 
-import { responseReceitaDTO } from '../util/types'
+import {
+  comentarioUsuarioSemSenha,
+  responseReceitaDTO,
+  usuarioSemSenha,
+} from '../util/types'
+
+const convertUsuarioToResponseUsuario = (usuario: Usuario) => {
+  return {
+    id: usuario.id,
+    usuario: usuario.usuario,
+    nome: usuario.nome,
+    email: usuario.email,
+  } as usuarioSemSenha
+}
+
+const converterListaComentarioToListaResponseComentario = (
+  comentarios: Comentario[]
+) => {
+  let listaReponseComentario: Array<comentarioUsuarioSemSenha> = [] // eslint-disable-line
+  comentarios.forEach(comentario => {
+    listaReponseComentario.push(
+      convertComentarioToResponseComentario(comentario)
+    )
+  })
+  return listaReponseComentario
+}
+
+const convertComentarioToResponseComentario = (comentario: Comentario) => {
+  return {
+    id: comentario.id,
+    usuario: convertUsuarioToResponseUsuario(comentario.usuario),
+    comentario: comentario.comentario,
+    comentarioPai: comentario.comentarioPai,
+    temResposta: comentario.temResposta,
+    principal: comentario.principal,
+  } as unknown as comentarioUsuarioSemSenha
+}
 
 export const convertReceitaToResponseReceita = (receita: Receita) => {
   const tempoPreparoHora = (receita.tempoPreparo / 60) | 0
@@ -22,7 +60,11 @@ export const convertReceitaToResponseReceita = (receita: Receita) => {
     listaPreparo: receita.listaPreparo,
     imagens: receita.imagens,
     dataCadastro: receita.dataCadastro,
-    usuario: receita.usuario,
+    usuario: convertUsuarioToResponseUsuario(receita.usuario),
+    curtidas: receita.curtidas,
+    comentarios: converterListaComentarioToListaResponseComentario(
+      receita.comentarios
+    ),
   }
 
   return responseReceita

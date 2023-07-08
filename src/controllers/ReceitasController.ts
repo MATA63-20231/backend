@@ -16,7 +16,10 @@ import {
 import { convertReceitaToResponseReceita } from '../util/convertToDataType'
 import Ingrediente from '../models/Ingrediente'
 import Preparo from '../models/Preparo'
-//import usuariosRepository from '../repositories/usuariosRepository'
+import usuariosRepository from '../repositories/usuariosRepository'
+import { Like } from 'typeorm'
+
+const usuarioId = '9f4afde4-63dd-4565-ad94-f7bfdd1218a6'
 
 export default class ReceitasController {
   async create(request: Request, response: Response) {
@@ -67,21 +70,21 @@ export default class ReceitasController {
         (tempo.minutos ? tempo.minutos : 0) +
         (tempo.horas ? tempo.horas * 60 : 0)
 
-      /*const usuario = await usuariosRepository.findOne({
+      const usuario = await usuariosRepository.findOne({
         where: { id: usuarioId },
       })
 
       if (!usuario)
         return response.status(400).json({
           message: 'Usuário de cadastro não informado',
-        })*/
+        })
 
       const novaReceita = receitasRepository.create({
         titulo,
         descricao,
         rendimento,
         tempoPreparo: tempoMinutos,
-        //usuario,
+        usuario,
       })
 
       if (ingredientes.length <= 0)
@@ -159,16 +162,8 @@ export default class ReceitasController {
 
   async findAll(request: Request, response: Response) {
     try {
-      const receitas = await receitasRepository
-        .createQueryBuilder('receita')
-        .innerJoinAndSelect('receita.ingredientes', 'ingredientes')
-        .innerJoinAndSelect('receita.listaPreparo', 'listaPreparo')
-        .leftJoinAndSelect('receita.imagens', 'imagens')
-        .orderBy({
-          'receita.dataCadastro': 'ASC',
-          'listaPreparo.ordem': 'ASC',
-        })
-        .getMany()
+      const receitas = await receitasRepository.find()
+
       if (receitas) {
         const receitasResponse: responseReceitaDTO[] = []
 
@@ -189,17 +184,9 @@ export default class ReceitasController {
     try {
       const { titulo } = request.body
 
-      const receitas = await receitasRepository
-        .createQueryBuilder('receita')
-        .innerJoinAndSelect('receita.ingredientes', 'ingredientes')
-        .innerJoinAndSelect('receita.listaPreparo', 'listaPreparo')
-        .leftJoinAndSelect('receita.imagens', 'imagens')
-        .where('receita.titulo like :titulo', { titulo: `%${titulo}%` })
-        .orderBy({
-          'receita.dataCadastro': 'ASC',
-          'listaPreparo.ordem': 'ASC',
-        })
-        .getMany()
+      const receitas = await receitasRepository.find({
+        where: { titulo: Like(`%${titulo}%`) },
+      })
 
       if (receitas) {
         const receitasResponse: responseReceitaDTO[] = []
@@ -213,6 +200,7 @@ export default class ReceitasController {
         response.status(200).json([])
       }
     } catch (error) {
+      console.log(error)
       return response.status(400).json({ Error: JSON.stringify(error) })
     }
   }
@@ -221,17 +209,7 @@ export default class ReceitasController {
     try {
       const { id } = request.params
 
-      const receita = await receitasRepository
-        .createQueryBuilder('receita')
-        .innerJoinAndSelect('receita.ingredientes', 'ingredientes')
-        .innerJoinAndSelect('receita.listaPreparo', 'listaPreparo')
-        .leftJoinAndSelect('receita.imagens', 'imagens')
-        .where('receita.id = :id', { id: id })
-        .orderBy({
-          'receita.dataCadastro': 'ASC',
-          'listaPreparo.ordem': 'ASC',
-        })
-        .getOne()
+      const receita = await receitasRepository.findOne({ where: { id } })
 
       if (!receita)
         return response.status(404).json({ Error: 'Registro não encontrado.' })
@@ -240,6 +218,7 @@ export default class ReceitasController {
 
       response.status(200).json(responseReceita)
     } catch (error) {
+      console.log(error)
       return response.status(400).json({ Error: JSON.stringify(error) })
     }
   }

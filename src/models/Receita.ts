@@ -12,6 +12,8 @@ import Ingrediente from './Ingrediente'
 import Preparo from './Preparo'
 import Usuario from './Usuario'
 import Imagem from './Imagem'
+import Curtida from './Curtida'
+import Comentario from './Comentario'
 
 @Entity('receita')
 export default class Receita {
@@ -30,22 +32,39 @@ export default class Receita {
   @Column({ type: 'numeric' })
   tempoPreparo: number
 
-  @ManyToOne(() => Usuario, { eager: true })
+  @ManyToOne(() => Usuario, { eager: true, lazy: false })
   @JoinColumn({ name: 'usuario_id' })
   usuario: Usuario
 
   @OneToMany(() => Ingrediente, ingrediente => ingrediente.receita, {
+    eager: true,
     onDelete: 'CASCADE',
   })
   ingredientes: Ingrediente[]
 
-  @OneToMany(() => Preparo, preparo => preparo.receita, { onDelete: 'CASCADE' })
+  @OneToMany(() => Preparo, preparo => preparo.receita, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   listaPreparo: Preparo[]
 
   @OneToMany(() => Imagem, imagem => imagem.receita, {
+    eager: true,
     onDelete: 'CASCADE',
   })
   imagens: Imagem[]
+
+  @OneToMany(() => Curtida, curtida => curtida.receita, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  curtidas: Curtida[]
+
+  @OneToMany(() => Comentario, comentario => comentario.receita, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
+  comentarios: Comentario[]
 
   @CreateDateColumn()
   dataCadastro: Date

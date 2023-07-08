@@ -1,3 +1,4 @@
+import Comentario from '../models/Comentario'
 import Ingrediente from '../models/Ingrediente'
 import Preparo from '../models/Preparo'
 import Receita from '../models/Receita'
@@ -26,11 +27,21 @@ export type createImageDTO = {
   nome: string
 }
 
-export type responseReceitaDTO = Omit<Receita, 'tempoPreparo'> & {
+export type usuarioSemSenha = Omit<Usuario, 'senha'>
+
+export type comentarioUsuarioSemSenha = Omit<Comentario, 'usuario'> &
+  usuarioSemSenha
+
+export type responseReceitaDTO = Omit<
+  Omit<Omit<Receita, 'tempoPreparo'>, 'comentarios'>,
+  'usuario'
+> & {
   tempoPreparo: {
     horas: number
     minutos: number
   }
+  comentarios: comentarioUsuarioSemSenha[]
+  usuario: usuarioSemSenha
 }
 
 export type fileType = {
@@ -60,4 +71,11 @@ export type updateSenhaUsuarioDTO = {
 export type authenticateUsuaroioDTO = {
   usuario: string
   senha: string
+}
+
+export type responseComentarioDTO = {
+  id: string
+  comentario: string
+  temResposta: boolean
+  comentarioPaiId: string
 }
