@@ -1,17 +1,9 @@
 import { Router } from 'express'
 import ReceitasController from '../controllers/ReceitasController'
 import multer from 'multer'
+import { storage } from '../config/multer'
 
-const storage = multer.diskStorage({
-  destination: (request, file, cb) => {
-    cb(null, './images/')
-  },
-  filename: (request, file, cb) => {
-    cb(null, new Date().getTime() + file.originalname)
-  },
-})
-
-const upload = multer({ storage: storage })
+const upload = multer(storage)
 
 const routes = Router()
 
@@ -22,6 +14,12 @@ routes.get('/', new ReceitasController().findByTitulo)
 routes.get('/:id', new ReceitasController().findById)
 
 routes.post('/', upload.array('imagens'), new ReceitasController().create)
+
+routes.put(
+  '/:receitaId',
+  upload.array('imagens'),
+  new ReceitasController().edit
+)
 
 routes.delete('/:id', new ReceitasController().delete)
 

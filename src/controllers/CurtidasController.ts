@@ -15,7 +15,7 @@ export default class CurtidasController {
           .status(400)
           .json({ message: 'É obrigatório indicar a receita' })
 
-      if (!curtida)
+      if (curtida === undefined)
         return response
           .status(400)
           .json({ message: 'A curtida deve ser informada' })

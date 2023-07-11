@@ -1,15 +1,8 @@
 import { Router } from 'express'
 import ImagensController from '../controllers/ImagensController'
-import multer from 'multer'
-
-const upload = multer({ dest: 'images/' })
 
 const routes = Router()
 
-routes.post(
-  '/:receitaId',
-  upload.array('imagens'),
-  new ImagensController().create
-)
+routes.get('/:imagemId', new ImagensController().obter)
 
 export default routes
