@@ -38,7 +38,7 @@ Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-202
     * `DB_NAME` (Nome do schema no banco de dados)
     * `PORT` (Porta de acesso da aplicação)
 
-4. Execução das migrations:
+3. Execução das migrations:
    ```bash
        yarn migration:run
    ```
