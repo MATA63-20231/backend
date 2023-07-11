@@ -21,13 +21,13 @@ Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-202
 * Instalação do [MySql](https://www.mysql.com/downloads/) versão 8 ou superior;
 * Instalação do [Yarn](https://yarnpkg.com/):
    ```bash
-   npm install -g yarn
+   $ npm install -g yarn
    ```
 
 ## Instalação
 1. Dentro da pasta do projeto, fazer o download/atualização das dependências:
    ```bash
-   yarn
+   $ yarn
    ```
 
 2. Criar um arquivo **.env** na raíz do projeto, contendo as seguintes variáveis de ambiente:
@@ -40,18 +40,18 @@ Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-202
 
 3. Execução das migrations:
    ```bash
-   yarn migration:run
+   $ yarn migration:run
    ```
 
 ## Execução
 Ambiente de homologação:
 ```bash
-yarn dev:server
+$ yarn dev:server
 ```
 
 ## Testes
 ```bash
-yarn test:run
+$ yarn test:run
 ```
  
 ## Build
@@ -61,7 +61,7 @@ $ yarn build
 
 ## Lint
 ```bash
-yarn lint
+$ yarn lint
 ```
 
 ## Como contribuir
