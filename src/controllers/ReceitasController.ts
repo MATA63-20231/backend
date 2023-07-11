@@ -41,7 +41,7 @@ export default class ReceitasController {
         typeof ingredientes == 'string'
           ? JSON.parse(ingredientes)
           : ingredientes
-      if (listaIngredientes.length < 1)
+      if (!listaIngredientes || listaIngredientes.length < 1)
         return response
           .status(400)
           .json({ message: 'Cadastro de ingredientes é obrigatório.' })
@@ -55,7 +55,11 @@ export default class ReceitasController {
         typeof tempoPreparo == 'string'
           ? JSON.parse(tempoPreparo)
           : tempoPreparo
-      if (!tempo || (tempo.minutos <= 0 && tempo.horas <= 0))
+      if (
+        !tempo ||
+        (!tempo.minutos && !tempo.horas) ||
+        (tempo.minutos <= 0 && tempo.horas <= 0)
+      )
         return response
           .status(400)
           .json({ message: 'Tempo de preparo deve ser superior a 0.' })

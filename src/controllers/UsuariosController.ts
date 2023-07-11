@@ -9,6 +9,8 @@ import {
 } from '../util/types'
 import Usuario from '../models/Usuario'
 
+import { convertUsuarioToResponseUsuario } from '../util/convertToDataType'
+
 export default class UsuarioController {
   async create(request: Request, response: Response) {
     try {
@@ -152,7 +154,10 @@ export default class UsuarioController {
       if (!passwordValido)
         return response.status(400).json({ message: 'Senha inválida' })
 
-      return response.status(201).json(true)
+      return response.status(201).json({
+        token: user.id,
+        usuario: convertUsuarioToResponseUsuario(user),
+      })
     } catch (error) {
       return response
         .status(400)

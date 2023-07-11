@@ -8,7 +8,7 @@ import {
   usuarioSemSenha,
 } from '../util/types'
 
-const convertUsuarioToResponseUsuario = (usuario: Usuario) => {
+export const convertUsuarioToResponseUsuario = (usuario: Usuario) => {
   return {
     id: usuario.id,
     usuario: usuario.usuario,
