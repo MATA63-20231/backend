@@ -50,10 +50,19 @@ yarn dev:server
 ```
 
 ## Testes
-[TODO]
+```bash
+yarn test:run
+```
+ 
+## Build
+```bash
+$ yarn build 
+```
 
 ## Lint
-[TODO]
+```bash
+yarn lint
+```
 
 ## Como contribuir
 Todos os _commits_ devem ser feitos a partir de uma _branch_ não protegida, e submetidos via _Pull Request (PR)_ para a `main`. Para serem _mergeados_, os _PRs_ devem estar de acordo com os seguintes critérios:
