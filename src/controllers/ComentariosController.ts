@@ -3,8 +3,6 @@ import usuariosRepository from '../repositories/usuariosRepository'
 import receitasRepository from '../repositories/receitasRepository'
 import comentariosRepository from '../repositories/comentariosRepository'
 
-const usuarioId = '9f4afde4-63dd-4565-ad94-f7bfdd1218a6'
-
 export default class CurtidasController {
   async create(request: Request, response: Response) {
     try {
