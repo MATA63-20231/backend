@@ -54,7 +54,7 @@ export class CriarTabelaImagens1688445752545 implements MigrationInterface {
       'receita',
       new TableColumn({
         name: 'imagem',
-        type: 'string',
+        type: 'varchar',
         isNullable: false,
       })
     )

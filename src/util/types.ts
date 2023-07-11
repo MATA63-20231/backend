@@ -16,9 +16,11 @@ export type createReceitaMultDTO = {
   titulo: string
   descricao: string
   rendimento: number
-  tempoPreparo: string
-  listaPreparo: string
-  ingredientes: string
+  tempoPreparo: number
+  listaPreparo: Array<Preparo>
+  listaIngredientes: Array<Ingrediente>
+  usuarioId: { id: string }
+  files: fileType[] | undefined
 }
 
 export type createImageDTO = {
@@ -57,9 +59,10 @@ export type createPreparoDTO = Omit<Preparo, 'id'>
 
 export type createIngredienteDTO = Omit<Ingrediente, 'id'>
 
-export type createUsuarioDTO = Omit<Usuario, 'id'> & {
-  confirmacaoSenha: string
-}
+export type createUsuarioDTO = Omit<
+  Omit<Omit<Usuario, 'id'>, 'dataCadastro'>,
+  'dataAtualizacao'
+>
 
 export type updateSenhaUsuarioDTO = {
   usuario: string

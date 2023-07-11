@@ -1,9 +1,9 @@
-import { Request, Response } from 'express'
 import receitasRepository from '../repositories/receitasRepository'
 import ingredientesRepository from '../repositories/ingredientesRepository'
 import Receita from '../models/Receita'
 import preparoRepository from '../repositories/preparoRepository'
 import imagensRepository from '../repositories/imagensRepository'
+import fs from 'fs'
 
 import {
   createReceitaMultDTO,
@@ -11,386 +11,290 @@ import {
   createPreparoDTO,
   responseReceitaDTO,
   createImageDTO,
-  fileType,
 } from '../util/types'
 import { convertReceitaToResponseReceita } from '../util/convertToDataType'
 import Ingrediente from '../models/Ingrediente'
 import Preparo from '../models/Preparo'
 import usuariosRepository from '../repositories/usuariosRepository'
 import { Like } from 'typeorm'
-
-const usuarioId = '9f4afde4-63dd-4565-ad94-f7bfdd1218a6'
+import Imagem from '../models/Imagem'
+import { pathImage } from '../config/multer'
 
 export default class ReceitasController {
-  async create(request: Request, response: Response) {
+  async create({
+    titulo,
+    descricao,
+    rendimento,
+    tempoPreparo,
+    listaPreparo,
+    listaIngredientes,
+    usuarioId,
+    files,
+  }: createReceitaMultDTO) {
     try {
-      const {
-        titulo,
-        descricao,
-        rendimento,
-        tempoPreparo,
-        listaPreparo,
-        ingredientes,
-      }: createReceitaMultDTO = request.body
-
-      //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-      if (!titulo)
-        return response.status(400).json({ message: 'O título é obrigatório.' })
-
-      const listaIngredientes =
-        typeof ingredientes == 'string'
-          ? JSON.parse(ingredientes)
-          : ingredientes
-      if (!listaIngredientes || listaIngredientes.length < 1)
-        return response
-          .status(400)
-          .json({ message: 'Cadastro de ingredientes é obrigatório.' })
-
-      if (!rendimento || rendimento == 0)
-        return response
-          .status(400)
-          .json({ message: 'O rendimento deve ser superior a 0.' })
-
-      const tempo: { minutos: number; horas: number } =
-        typeof tempoPreparo == 'string'
-          ? JSON.parse(tempoPreparo)
-          : tempoPreparo
-      if (
-        !tempo ||
-        (!tempo.minutos && !tempo.horas) ||
-        (tempo.minutos <= 0 && tempo.horas <= 0)
-      )
-        return response
-          .status(400)
-          .json({ message: 'Tempo de preparo deve ser superior a 0.' })
-
-      if (tempo.minutos > 59)
-        return response.status(400).json({
-          message:
-            'Quantidade de minutos para preparo não pode ser superior a 59 minutos.',
-        })
-
-      const tempoMinutos =
-        (tempo.minutos ? tempo.minutos : 0) +
-        (tempo.horas ? tempo.horas * 60 : 0)
-
       const usuario = await usuariosRepository.findOne({
-        where: { id: usuarioId },
+        where: { id: usuarioId.id },
       })
 
-      if (!usuario)
-        return response.status(400).json({
-          message: 'Usuário de cadastro não informado',
-        })
+      if (!usuario) throw new Error('Usuário não encontrado')
 
       const novaReceita = receitasRepository.create({
         titulo,
         descricao,
         rendimento,
-        tempoPreparo: tempoMinutos,
-        usuario,
-      })
-
-      if (ingredientes.length <= 0)
-        return response.status(400).json({
-          message: 'Obrigatório o cadastro de ao menos um ingrediente.',
-        })
-      //To-do: Entender o motivo do problema no lint da linha abaixo
-      let novosIngredientes: Array<createIngredienteDTO> = [] // eslint-disable-line
-      listaIngredientes.forEach((ingrediente: Ingrediente) => {
-        const novoIngrediente: createIngredienteDTO = {
-          descricao: ingrediente.descricao,
-          receita: novaReceita,
-        }
-        novosIngredientes.push(novoIngrediente)
-      })
-
-      if (listaPreparo.length <= 0)
-        return response.status(400).json({
-          message: 'Obrigatório o cadastro de item para preparo.',
-        })
-
-      const preparo =
-        typeof listaPreparo == 'string'
-          ? JSON.parse(listaPreparo)
-          : listaPreparo
-      //To-do: Entender o motivo do problema no lint da linha abaixo
-      let novaListaPreparo: Array<createPreparoDTO> = [] // eslint-disable-line
-      preparo.forEach((preparo: Preparo, index: number) => {
-        const novoPreparo: createPreparoDTO = {
-          ordem: index,
-          descricao: preparo.descricao,
-          receita: novaReceita,
-        }
-        novaListaPreparo.push(novoPreparo)
-      })
-
-      const files = request.files as unknown[] as fileType[]
-
-      let novasImagens: Array<createImageDTO> = [] // eslint-disable-line
-      if (files && files.length > 0) {
-        files.forEach((file, index: number) => {
-          const novaImagem: createImageDTO = {
-            receita: novaReceita,
-            ordem: index,
-            nome: file.filename,
-          }
-          novasImagens.push(novaImagem)
-        })
-      }
-
-      if (novaReceita) await receitasRepository.save(novaReceita)
-      if (novaListaPreparo.length > 0)
-        await preparoRepository.save(novaListaPreparo)
-      if (novosIngredientes.length > 0)
-        await ingredientesRepository.save(novosIngredientes)
-      if (novasImagens.length > 0) await imagensRepository.save(novasImagens)
-
-      const responseReceita = await receitasRepository
-        .createQueryBuilder('receita')
-        .innerJoinAndSelect('receita.ingredientes', 'ingredientes')
-        .innerJoinAndSelect('receita.listaPreparo', 'listaPreparo')
-        .leftJoinAndSelect('receita.imagens', 'imagens')
-        .where('receita.id = :id', { id: novaReceita.id })
-        .orderBy({
-          'receita.dataCadastro': 'ASC',
-          'listaPreparo.ordem': 'ASC',
-        })
-        .getOne()
-
-      return response.status(201).json(responseReceita)
-    } catch (error) {
-      return response.status(400).json({ Error: JSON.stringify(error) })
-    }
-  }
-
-  async edit(request: Request, response: Response) {
-    try {
-      const { receitaId } = request.params
-      const {
-        titulo,
-        descricao,
-        rendimento,
         tempoPreparo,
-        listaPreparo,
-        ingredientes,
-      }: createReceitaMultDTO = request.body
-
-      if (!receitaId)
-        return response
-          .status(400)
-          .json({ message: 'Id da receita não informado.' })
-
-      //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-      if (!titulo)
-        return response.status(400).json({ message: 'O título é obrigatório.' })
-
-      const listaIngredientes =
-        typeof ingredientes == 'string'
-          ? JSON.parse(ingredientes)
-          : ingredientes
-      if (!listaIngredientes || listaIngredientes.length < 1)
-        return response
-          .status(400)
-          .json({ message: 'Cadastro de ingredientes é obrigatório.' })
-
-      if (!rendimento || rendimento == 0)
-        return response
-          .status(400)
-          .json({ message: 'O rendimento deve ser superior a 0.' })
-
-      const tempo: { minutos: number; horas: number } =
-        typeof tempoPreparo == 'string'
-          ? JSON.parse(tempoPreparo)
-          : tempoPreparo
-      if (
-        !tempo ||
-        (!tempo.minutos && !tempo.horas) ||
-        (tempo.minutos <= 0 && tempo.horas <= 0)
-      )
-        return response
-          .status(400)
-          .json({ message: 'Tempo de preparo deve ser superior a 0.' })
-
-      if (tempo.minutos > 59)
-        return response.status(400).json({
-          message:
-            'Quantidade de minutos para preparo não pode ser superior a 59 minutos.',
-        })
-
-      const tempoMinutos =
-        (tempo.minutos ? tempo.minutos : 0) +
-        (tempo.horas ? tempo.horas * 60 : 0)
-
-      const usuario = await usuariosRepository.findOne({
-        where: { id: usuarioId },
-      })
-
-      if (!usuario)
-        return response.status(400).json({
-          message: 'Usuário de cadastro não informado',
-        })
-
-      const novaReceita = receitasRepository.create({
-        titulo,
-        descricao,
-        rendimento,
-        tempoPreparo: tempoMinutos,
         usuario,
       })
 
-      if (ingredientes.length <= 0)
-        return response.status(400).json({
-          message: 'Obrigatório o cadastro de ao menos um ingrediente.',
-        })
       //To-do: Entender o motivo do problema no lint da linha abaixo
-      let novosIngredientes: Array<createIngredienteDTO> = [] // eslint-disable-line
-      listaIngredientes.forEach((ingrediente: Ingrediente) => {
-        const novoIngrediente: createIngredienteDTO = {
-          descricao: ingrediente.descricao,
-          receita: novaReceita,
+      const novosIngredientes: Array<createIngredienteDTO> = [] // eslint-disable-line
+      if (listaIngredientes.length > 0)
+        for (const ingrediente of listaIngredientes) {
+          novosIngredientes.push({
+            descricao: ingrediente.descricao,
+            receita: novaReceita,
+          })
         }
-        novosIngredientes.push(novoIngrediente)
-      })
 
-      if (listaPreparo.length <= 0)
-        return response.status(400).json({
-          message: 'Obrigatório o cadastro de item para preparo.',
-        })
-
-      const preparo =
-        typeof listaPreparo == 'string'
-          ? JSON.parse(listaPreparo)
-          : listaPreparo
       //To-do: Entender o motivo do problema no lint da linha abaixo
-      let novaListaPreparo: Array<createPreparoDTO> = [] // eslint-disable-line
-      preparo.forEach((preparo: Preparo, index: number) => {
-        const novoPreparo: createPreparoDTO = {
-          ordem: index,
-          descricao: preparo.descricao,
-          receita: novaReceita,
+      const novaListaPreparo: Array<createPreparoDTO> = [] // eslint-disable-line
+      if (listaPreparo.length > 0) {
+        let contador = 0
+        for (const preparo of listaPreparo) {
+          novaListaPreparo.push({
+            ordem: contador++,
+            descricao: preparo.descricao,
+            receita: novaReceita,
+          })
         }
-        novaListaPreparo.push(novoPreparo)
-      })
+      }
 
-      const files = request.files as unknown[] as fileType[]
-
-      let novasImagens: Array<createImageDTO> = [] // eslint-disable-line
+      /* eslint-disable */
+      let novasImagens: Array<createImageDTO> = []
+      // @ts-ignore
       if (files && files.length > 0) {
+        // @ts-ignore
         files.forEach((file, index: number) => {
           const novaImagem: createImageDTO = {
             receita: novaReceita,
             ordem: index,
+            // @ts-ignore
             nome: file.filename,
           }
           novasImagens.push(novaImagem)
         })
       }
+      /* eslint-enable */
 
-      if (novaReceita) await receitasRepository.save(novaReceita)
-      if (novaListaPreparo.length > 0)
-        await preparoRepository.save(novaListaPreparo)
-      if (novosIngredientes.length > 0)
-        await ingredientesRepository.save(novosIngredientes)
-      if (novasImagens.length > 0) await imagensRepository.save(novasImagens)
+      if (novaReceita) {
+        const receitaSalva = await receitasRepository.save(novaReceita)
+        if (novaListaPreparo.length > 0)
+          await preparoRepository.insert(novaListaPreparo)
+        if (novosIngredientes.length > 0)
+          await ingredientesRepository.insert(novosIngredientes)
+        if (novasImagens.length > 0) await imagensRepository.save(novasImagens)
 
-      const responseReceita = await receitasRepository
-        .createQueryBuilder('receita')
-        .innerJoinAndSelect('receita.ingredientes', 'ingredientes')
-        .innerJoinAndSelect('receita.listaPreparo', 'listaPreparo')
-        .leftJoinAndSelect('receita.imagens', 'imagens')
-        .where('receita.id = :id', { id: novaReceita.id })
-        .orderBy({
-          'receita.dataCadastro': 'ASC',
-          'listaPreparo.ordem': 'ASC',
+        const responseReceita = await receitasRepository.findOne({
+          where: { id: receitaSalva.id },
         })
-        .getOne()
-
-      return response.status(201).json(responseReceita)
-    } catch (error) {
-      return response.status(400).json({ Error: JSON.stringify(error) })
-    }
-  }
-
-  async findAll(request: Request, response: Response) {
-    try {
-      const receitas = await receitasRepository.find()
-
-      if (receitas) {
-        const receitasResponse: responseReceitaDTO[] = []
-
-        receitas.forEach(receita => {
-          return receitasResponse.push(convertReceitaToResponseReceita(receita))
-        })
-
-        response.status(200).json(receitasResponse) // eslint-disable-line
-      } else {
-        response.status(200).json([])
+        if (responseReceita)
+          return convertReceitaToResponseReceita(responseReceita)
       }
-    } catch (error) {
-      return response.status(400).json({ Error: JSON.stringify(error) })
-    }
-  }
 
-  async findByTitulo(request: Request, response: Response) {
-    try {
-      const { titulo } = request.body
-
-      const receitas = await receitasRepository.find({
-        where: { titulo: Like(`%${titulo}%`) },
-      })
-
-      if (receitas) {
-        const receitasResponse: responseReceitaDTO[] = []
-
-        receitas.forEach(receita => {
-          return receitasResponse.push(convertReceitaToResponseReceita(receita))
-        })
-
-        response.status(200).json(receitasResponse) // eslint-disable-line
-      } else {
-        response.status(200).json([])
-      }
+      throw new Error('Falha na inclusão da receita')
     } catch (error) {
       console.log(error)
-      return response.status(400).json({ Error: JSON.stringify(error) })
+      throw new Error('Falha na inclusão da receita')
     }
   }
 
-  async findById(request: Request, response: Response) {
-    try {
-      const { id } = request.params
+  async edit({
+    receitaId,
+    titulo,
+    descricao,
+    rendimento,
+    tempoPreparo,
+    listaPreparo,
+    listaIngredientes,
+    usuarioId,
+    files,
+  }: createReceitaMultDTO & { receitaId: string }) {
+    const usuario = await usuariosRepository.findOne({
+      where: { id: usuarioId.id },
+    })
 
+    if (!usuario) throw new Error('Usuário não encontrado')
+
+    if (!receitaId) throw new Error('Receita não encontrada')
+
+    const receita = await receitasRepository.findOne({
+      where: { id: receitaId },
+    })
+
+    if (!receita) throw new Error('Receita não encontrada')
+
+    if (receita.usuario.id != usuario.id)
+      throw new Error('Usuário sem permissão para alterar a receita')
+
+    const receitaAlterada = receitasRepository.create({
+      titulo,
+      descricao,
+      rendimento,
+      tempoPreparo,
+      usuario,
+    })
+
+    //To-do: Entender o motivo do problema no lint da linha abaixo
+    let novosIngredientes: Array<createIngredienteDTO> = [] // eslint-disable-line
+    listaIngredientes.forEach((ingrediente: Ingrediente) => {
+      const novoIngrediente: createIngredienteDTO = {
+        descricao: ingrediente.descricao,
+        receita: receita,
+      }
+      novosIngredientes.push(novoIngrediente)
+    })
+
+    //To-do: Entender o motivo do problema no lint da linha abaixo
+    let novaListaPreparo: Array<createPreparoDTO> = [] // eslint-disable-line
+    listaPreparo.forEach((preparo: Preparo, index: number) => {
+      const novoPreparo: createPreparoDTO = {
+        ordem: index,
+        descricao: preparo.descricao,
+        receita: receita,
+      }
+      novaListaPreparo.push(novoPreparo)
+    })
+
+    /* eslint-disable */
+    let novasImagens: Array<createImageDTO> = []
+    // @ts-ignore
+    if (files && files.length > 0) {
+      // @ts-ignore
+      files.forEach((file, index: number) => {
+        const novaImagem: createImageDTO = {
+          receita: receita,
+          ordem: index,
+          // @ts-ignore
+          nome: file.filename,
+        }
+        novasImagens.push(novaImagem)
+      })
+    }
+    /* eslint-enable */
+
+    try {
+      const imagensAntigas = receita.imagens
+      for (const imagem of imagensAntigas) {
+        fs.unlink(`${pathImage}/${imagem.nome}`, error => {
+          console.log(error)
+        })
+      }
+
+      preparoRepository
+        .createQueryBuilder('preparo')
+        .delete()
+        .from(Preparo)
+        .where('receita_id = :id', { id: receita.id })
+        .execute()
+      ingredientesRepository
+        .createQueryBuilder('ingrediente')
+        .delete()
+        .from(Ingrediente)
+        .where('receita_id = :id', { id: receita.id })
+        .execute()
+      imagensRepository
+        .createQueryBuilder('imagem')
+        .delete()
+        .from(Imagem)
+        .where('receita_id = :id', { id: receita.id })
+        .execute()
+
+      Object.assign(receita, receitaAlterada)
+      const novaReceitaAlterada = await receitasRepository.save(receita)
+
+      if (novaReceitaAlterada) {
+        if (novaListaPreparo.length > 0)
+          await preparoRepository.insert(novaListaPreparo)
+        if (novosIngredientes.length > 0)
+          await ingredientesRepository.insert(novosIngredientes)
+        if (novasImagens.length > 0)
+          await imagensRepository.insert(novasImagens)
+
+        const responseReceita = await receitasRepository.findOne({
+          where: { id: novaReceitaAlterada.id },
+        })
+        if (responseReceita)
+          return convertReceitaToResponseReceita(responseReceita)
+      }
+      throw new Error('Falha na alteração da receita')
+    } catch (error) {
+      console.log(error)
+      throw new Error('Falha na alteração da receita')
+    }
+  }
+
+  async findAll() {
+    const receitas = await receitasRepository.find()
+
+    if (receitas) {
+      const receitasResponse: responseReceitaDTO[] = []
+
+      receitas.forEach(receita => {
+        return receitasResponse.push(convertReceitaToResponseReceita(receita))
+      })
+
+      return receitasResponse
+    } else {
+      return []
+    }
+  }
+
+  async findByTitulo(titulo: string) {
+    const receitas = await receitasRepository.find({
+      where: { titulo: Like(`%${titulo}%`) },
+    })
+
+    if (receitas) {
+      const receitasResponse: responseReceitaDTO[] = []
+
+      receitas.forEach(receita => {
+        return receitasResponse.push(convertReceitaToResponseReceita(receita))
+      })
+
+      return receitasResponse
+    } else {
+      return []
+    }
+  }
+
+  async findById(id: string) {
+    try {
       const receita = await receitasRepository.findOne({ where: { id } })
 
-      if (!receita)
-        return response.status(404).json({ Error: 'Registro não encontrado.' })
+      if (!receita) throw new Error('Registro não encontrado.')
 
       const responseReceita = convertReceitaToResponseReceita(receita)
 
-      response.status(200).json(responseReceita)
+      return responseReceita
     } catch (error) {
       console.log(error)
-      return response.status(400).json({ Error: JSON.stringify(error) })
+      throw new Error('Registro não encontrado.')
     }
   }
 
-  async delete(request: Request, response: Response) {
+  async delete(id: string) {
     try {
-      const { id } = request.params
-
       const receita: Receita | null = await receitasRepository.findOne({
         where: { id },
       })
 
-      if (!receita)
-        return response.status(404).json({ Error: 'Registro não encontrado.' })
+      if (!receita) throw new Error('Registro não encontrado.')
 
       await receitasRepository.remove(receita)
 
-      response.status(200).json({ Message: 'Receita apagada com sucesso!' })
+      return 'Receita deletada com sucesso!'
     } catch (error) {
-      return response.status(400).json({ Error: JSON.stringify(error) })
+      throw new Error('Falha ao excluir receita')
     }
   }
 }

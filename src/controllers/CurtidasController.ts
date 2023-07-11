@@ -1,27 +1,10 @@
-import { Request, Response } from 'express'
 import curtidasRepository from '../repositories/curtidasRepository'
 import usuariosRepository from '../repositories/usuariosRepository'
 import receitasRepository from '../repositories/receitasRepository'
 
-const usuarioId = '9f4afde4-63dd-4565-ad94-f7bfdd1218a6'
-
 export default class CurtidasController {
-  async curtida(request: Request, response: Response) {
+  async curtida(receitaId: string, curtida: boolean, usuarioId: string) {
     try {
-      const { receitaId } = request.params
-      const { curtida } = request.body
-
-      //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-      if (!receitaId)
-        return response
-          .status(400)
-          .json({ message: 'É obrigatório indicar a receita' })
-
-      if (curtida === undefined)
-        return response
-          .status(400)
-          .json({ message: 'A curtida deve ser informada' })
-
       const curtidaUsuarioReceita = await curtidasRepository
         .createQueryBuilder('curtida')
         .where(
@@ -47,15 +30,9 @@ export default class CurtidasController {
           .where('id = :id', { id: usuarioId })
           .getOne()
 
-        if (!receita)
-          return response
-            .status(400)
-            .json({ message: 'Receita informada é inválida' })
+        if (!receita) throw new Error('Receita informada é inválida')
 
-        if (!usuario)
-          return response
-            .status(400)
-            .json({ message: 'Usuário informado é inválido' })
+        if (!usuario) throw new Error('Usuário informado é inválido')
 
         const novaCurtida = curtidasRepository.create({
           usuario: usuario,
@@ -65,21 +42,17 @@ export default class CurtidasController {
 
         await curtidasRepository.save(novaCurtida)
       }
-      return response.status(200).json({ message: 'Curtida incluida' })
+      return { message: 'Curtida incluida' }
     } catch (error) {
-      return response.status(400).json({ Error: error })
+      console.log(error)
+      return { message: 'Falha na inclusão da curtida' }
     }
   }
 
-  async delete(request: Request, response: Response) {
+  async delete(receitaId: string, usuarioId: string) {
     try {
-      const { receitaId } = request.params
-
       //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-      if (!receitaId)
-        return response
-          .status(400)
-          .json({ message: 'É obrigatório indicar a receita' })
+      if (!receitaId) throw new Error('É obrigatório indicar a receita')
 
       const curtida = await curtidasRepository
         .createQueryBuilder('curtida')
@@ -89,14 +62,14 @@ export default class CurtidasController {
         )
         .getOne()
 
-      if (!curtida)
-        return response.status(400).json({ message: 'Curtida não encontrada' })
+      if (!curtida) throw new Error('Curtida não encontrada')
 
       await curtidasRepository.remove(curtida)
 
-      return response.status(200).json({ message: 'Curtida removida' })
+      return { message: 'Curtida removida' }
     } catch (error) {
-      return response.status(400).json({ Error: error })
+      console.log(error)
+      return { message: 'Falha em remover a curtida' }
     }
   }
 }

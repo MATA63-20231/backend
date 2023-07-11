@@ -1,6 +1,10 @@
-import { Request, Response } from 'express'
 import { hash, compare } from 'bcryptjs'
 import usuarioRepository from '../repositories/usuariosRepository'
+import { sign } from 'jsonwebtoken'
+
+import { authenticator } from '../config/authenticator'
+
+import { convertUsuarioToResponseUsuario } from '../util/convertToDataType'
 
 import {
   createUsuarioDTO,
@@ -9,30 +13,9 @@ import {
 } from '../util/types'
 import Usuario from '../models/Usuario'
 
-import { convertUsuarioToResponseUsuario } from '../util/convertToDataType'
-
 export default class UsuarioController {
-  async create(request: Request, response: Response) {
+  async create({ usuario, nome, email, senha }: createUsuarioDTO) {
     try {
-      const {
-        usuario,
-        nome,
-        email,
-        senha,
-        confirmacaoSenha,
-      }: createUsuarioDTO = request.body
-
-      //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-      if (!usuario)
-        return response
-          .status(400)
-          .json({ message: 'O username é obrigatório' })
-
-      if (!senha || !confirmacaoSenha || senha != confirmacaoSenha)
-        return response
-          .status(400)
-          .json({ message: 'A senha e a confirmação não coincidem' })
-
       const hashedPassword = await hash(senha, 8)
 
       const novoUsuario = usuarioRepository.create({
@@ -44,51 +27,26 @@ export default class UsuarioController {
 
       await usuarioRepository.save(novoUsuario)
 
-      return response
-        .status(201)
-        .json({ message: 'Usuario criado com sucesso!' })
+      return convertUsuarioToResponseUsuario(novoUsuario)
     } catch (error) {
-      return response.status(400).json({ error: error })
-      //.json({ message: 'Falha na criação do usuário!' })
+      console.log(error)
+      throw new Error('Falha na criação de usuário')
     }
   }
 
-  async updateSenha(request: Request, response: Response) {
+  async updateSenha({ usuario, senhaAtual, novaSenha }: updateSenhaUsuarioDTO) {
     try {
-      const {
-        usuario,
-        senhaAtual,
-        novaSenha,
-        confirmacaoSenha,
-      }: updateSenhaUsuarioDTO = request.body
-
-      if (!usuario)
-        return response.status(400).json({ message: 'Usuário inválido! ' })
-
-      if (
-        !senhaAtual ||
-        !novaSenha ||
-        !confirmacaoSenha ||
-        novaSenha != confirmacaoSenha
-      ) {
-        return response
-          .status(400)
-          .json({ message: 'A senha e a confirmação não coincidem' })
-      }
-
       const user = await usuarioRepository.findOne({
         where: {
           usuario: usuario,
         },
       })
 
-      if (!user)
-        return response.status(400).json({ message: 'Usuario não encontrado' })
+      if (!user) throw new Error('Usuario não encontrado')
 
       const passwordValido = await compare(senhaAtual, user.senha)
 
-      if (!passwordValido)
-        return response.status(400).json({ message: 'Senha inválida' })
+      if (!passwordValido) throw new Error('Senha inválida')
 
       const hashedPasswordAtual = await hash(novaSenha, 8)
 
@@ -101,67 +59,58 @@ export default class UsuarioController {
         }
       )
 
-      return response
-        .status(201)
-        .json({ message: 'Senha alterada com sucesso!' })
+      return { message: 'Senha alterada com sucesso!' }
     } catch (error) {
-      return response.status(400).json({ error: error })
-      //.json({ message: 'Falha na criação do usuário!' })
+      console.log(error)
+      throw new Error('Falha na alteração de senha')
     }
   }
 
-  async delete(request: Request, response: Response) {
+  async delete(id: string) {
     try {
-      const { id } = request.params
-
       const usuario: Usuario | null = await usuarioRepository.findOne({
         where: { id },
       })
 
-      if (!usuario)
-        return response.status(404).json({ Error: 'Registro não encontrado' })
+      if (!usuario) throw new Error('Usuário não encontrado')
 
       await usuarioRepository.remove(usuario)
 
-      response.status(200).json({ Message: 'Usuario apagado com sucesso!' })
+      return { message: 'Usuário excluído com sucesso!' }
     } catch (error) {
-      return response.status(400).json({ Error: error })
+      console.log(error)
+      throw new Error('Falha na alteração de senha')
     }
   }
 
-  async authenticate(request: Request, response: Response) {
-    try {
-      const { usuario, senha }: authenticateUsuaroioDTO = request.body
+  async authenticate({ usuario, senha }: authenticateUsuaroioDTO) {
+    if (!authenticator.jwt.secret) throw new Error('Secret não encontrado')
 
-      if (!usuario)
-        return response.status(400).json({ message: 'Usuário inválido! ' })
+    console.log(usuario)
+    console.log(senha)
 
-      if (!senha) {
-        return response.status(400).json({ message: 'A senha não informada' })
-      }
+    const user = await usuarioRepository.findOne({
+      where: {
+        usuario: usuario,
+      },
+    })
 
-      const user = await usuarioRepository.findOne({
-        where: {
-          usuario: usuario,
-        },
-      })
+    if (!user) throw new Error('Falha na autenticação')
 
-      if (!user)
-        return response.status(400).json({ message: 'Usuario não encontrado' })
+    const passwordValido = await compare(senha, user.senha)
 
-      const passwordValido = await compare(senha, user.senha)
+    if (!passwordValido) throw new Error('Falha na autenticação')
 
-      if (!passwordValido)
-        return response.status(400).json({ message: 'Senha inválida' })
+    const token = sign({}, authenticator.jwt.secret, {
+      subject: user.id,
+      expiresIn: authenticator.jwt.expiresIn,
+    })
 
-      return response.status(201).json({
-        token: user.id,
-        usuario: convertUsuarioToResponseUsuario(user),
-      })
-    } catch (error) {
-      return response
-        .status(400)
-        .json({ message: 'Falha na inclusão do usuário!' })
+    console.log(token)
+
+    return {
+      token: token,
+      usuario: convertUsuarioToResponseUsuario(user),
     }
   }
 }
