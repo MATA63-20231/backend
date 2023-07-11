@@ -3,23 +3,23 @@
 Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-20231/geral.
 
 ## Tecnologias
-- Node.js;
-- Yarn;
-- Typescript;
-- MySql.
+* Node.js;
+* Yarn;
+* Typescript;
+* MySql.
 
 ## Principais dependências
-- Express;
-- TypeORM;
-- Mysql2;
-- ESLint;
-- Prettier;
-- Dotenv.
+* Express;
+* TypeORM;
+* Mysql2;
+* ESLint;
+* Prettier;
+* Dotenv.
 
 ## Pré-requisitos
-- Instalação do [Node.js](https://nodejs.org/en/download) versão 14.x;
-- Instalação do [MySql](https://www.mysql.com/downloads/) versão 8 ou superior;
-- Instalação do [Yarn](https://yarnpkg.com/):
+* Instalação do [Node.js](https://nodejs.org/en/download) versão 14.x;
+* Instalação do [MySql](https://www.mysql.com/downloads/) versão 8 ou superior;
+* Instalação do [Yarn](https://yarnpkg.com/):
    ```bash
    npm install -g yarn
    ```
