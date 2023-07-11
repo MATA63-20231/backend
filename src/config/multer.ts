@@ -2,7 +2,7 @@ import multer from 'multer'
 import path from 'path'
 import crypto from 'crypto'
 
-export const pathImage = path.resolve(__dirname, 'images')
+export const pathImage = path.resolve(__dirname, '..', 'images')
 
 export const storage: multer.Options = {
   dest: pathImage,
