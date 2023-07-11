@@ -3,6 +3,8 @@ import curtidasRepository from '../repositories/curtidasRepository'
 import usuariosRepository from '../repositories/usuariosRepository'
 import receitasRepository from '../repositories/receitasRepository'
 
+const usuarioId = '9f4afde4-63dd-4565-ad94-f7bfdd1218a6'
+
 export default class CurtidasController {
   async curtida(request: Request, response: Response) {
     try {
@@ -19,8 +21,6 @@ export default class CurtidasController {
         return response
           .status(400)
           .json({ message: 'A curtida deve ser informada' })
-
-      const usuarioId = '9f4afde4-63dd-4565-ad94-f7bfdd1218a6'
 
       const curtidaUsuarioReceita = await curtidasRepository
         .createQueryBuilder('curtida')
@@ -80,8 +80,6 @@ export default class CurtidasController {
         return response
           .status(400)
           .json({ message: 'É obrigatório indicar a receita' })
-
-      const usuarioId = '9f4afde4-63dd-4565-ad94-f7bfdd1218a6'
 
       const curtida = await curtidasRepository
         .createQueryBuilder('curtida')
