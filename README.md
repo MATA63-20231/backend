@@ -3,31 +3,31 @@
 Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-20231/geral.
 
 ## Tecnologias
-* Node.js
-* Yarn
-* Typescript
-* MySql
+* Node.js;
+* Yarn;
+* Typescript;
+* MySql.
 
 ## Principais dependências
-* Express
-* TypeORM
-* Mysql2
-* ESLint
-* Prettier
-* Dotenv
+* Express;
+* TypeORM;
+* Mysql2;
+* ESLint;
+* Prettier;
+* Dotenv.
 
 ## Pré-requisitos
-* Instalação do [Node.js](https://nodejs.org/en/download) versão 14.x
-* Instalação do [MySql](https://www.mysql.com/downloads/) versão 8 ou superior
+* Instalação do [Node.js](https://nodejs.org/en/download) versão 14.x;
+* Instalação do [MySql](https://www.mysql.com/downloads/) versão 8 ou superior;
 * Instalação do [Yarn](https://yarnpkg.com/):
    ```bash
-       npm install -g yarn
+   npm install -g yarn
    ```
 
 ## Instalação
 1. Dentro da pasta do projeto, fazer o download/atualização das dependências:
    ```bash
-       yarn
+   yarn
    ```
 
 2. Criar um arquivo **.env** na raíz do projeto, contendo as seguintes variáveis de ambiente:
@@ -40,13 +40,13 @@ Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-202
 
 3. Execução das migrations:
    ```bash
-       yarn migration:run
+   yarn migration:run
    ```
 
 ## Execução
 Ambiente de homologação:
 ```bash
-    yarn dev:server
+yarn dev:server
 ```
 
 ## Testes
