@@ -3,13 +3,6 @@ import curtidasRepository from '../repositories/curtidasRepository'
 import usuariosRepository from '../repositories/usuariosRepository'
 import receitasRepository from '../repositories/receitasRepository'
 
-import * as yup from 'yup'
-import { ReceitaIdValidate } from '../validates/receitas/index'
-import { CurtidaValidate } from '../validates/curtidas/index'
-
-const receitaIdSchema = ReceitaIdValidate;
-const curtidaSchema = CurtidaValidate;
-
 const usuarioId = '9f4afde4-63dd-4565-ad94-f7bfdd1218a6'
 
 export default class CurtidasController {
@@ -18,8 +11,16 @@ export default class CurtidasController {
       const { receitaId } = request.params
       const { curtida } = request.body
 
-      await receitaIdSchema.validate({ receitaId: receitaId }, { strict: true})
-      await curtidaSchema.validate({ curtida: curtida }, { strict: true})
+      //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
+      if (!receitaId)
+        return response
+          .status(400)
+          .json({ message: 'É obrigatório indicar a receita' })
+
+      if (curtida === undefined)
+        return response
+          .status(400)
+          .json({ message: 'A curtida deve ser informada' })
 
       const curtidaUsuarioReceita = await curtidasRepository
         .createQueryBuilder('curtida')
@@ -66,9 +67,6 @@ export default class CurtidasController {
       }
       return response.status(200).json({ message: 'Curtida incluida' })
     } catch (error) {
-      if(error instanceof yup.ValidationError) {
-        return response.status(400).json({ error: error.errors.join(', ') })
-      }
       return response.status(400).json({ Error: error })
     }
   }
@@ -76,7 +74,12 @@ export default class CurtidasController {
   async delete(request: Request, response: Response) {
     try {
       const { receitaId } = request.params
-      await receitaIdSchema.validate({ receitaId: receitaId }, { strict: true})
+
+      //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
+      if (!receitaId)
+        return response
+          .status(400)
+          .json({ message: 'É obrigatório indicar a receita' })
 
       const curtida = await curtidasRepository
         .createQueryBuilder('curtida')
@@ -93,9 +96,6 @@ export default class CurtidasController {
 
       return response.status(200).json({ message: 'Curtida removida' })
     } catch (error) {
-      if(error instanceof yup.ValidationError) {
-        return response.status(400).json({ error: error.errors.join(', ') })
-      }
       return response.status(400).json({ Error: error })
     }
   }
