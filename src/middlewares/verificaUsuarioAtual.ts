@@ -17,27 +17,23 @@ export default function verificaUsuarioAtual(
 ) {
   const authHeader = request.headers.authorization
 
-  if (!authHeader) return next()
+  if (authHeader) {
+    const [, token] = authHeader.split(' ')
+    try {
+      if (authenticator.jwt.secret) {
+        const decoded = verify(token, authenticator.jwt.secret)
 
-  const [, token] = authHeader.split(' ')
+        const { sub } = decoded as TokenPayload
 
-  try {
-    if (!authenticator.jwt.secret) {
+        /*eslint-disable*/
+        // @ts-ignore
+        request.usuario = { id: sub }
+        /*eslint-enable*/
+      }
+    } catch (error) {
+      console.log(error)
       return next()
     }
-
-    const decoded = verify(token, authenticator.jwt.secret)
-
-    const { sub } = decoded as TokenPayload
-
-    /*eslint-disable*/
-    // @ts-ignore
-    request.usuario = { id: sub }
-    /*eslint-enable*/
-  } catch (error) {
-    console.log(error)
-    return next()
   }
-
   next()
 }
