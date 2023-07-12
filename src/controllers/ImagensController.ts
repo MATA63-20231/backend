@@ -1,5 +1,5 @@
 import imagensRepository from '../repositories/imagensRepository'
-import { pathImage } from '../config/multer'
+//import { pathImage } from '../config/multer'
 
 export default class ImagensController {
   async obter(imagemId: string) {
@@ -13,7 +13,7 @@ export default class ImagensController {
 
       if (!imagem) throw new Error('Imagem não encontrada')
 
-      return `${pathImage}/${imagem.nome}`
+      return imagem.data
     } catch (error) {
       console.log(error)
       throw new Error('Falha ao salvar imagem')

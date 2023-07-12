@@ -74,12 +74,13 @@ export default class ReceitasController {
       // @ts-ignore
       if (files && files.length > 0) {
         // @ts-ignore
-        files.forEach((file, index: number) => {
+        files.forEach(async (file, index: number) => {
           const novaImagem: createImageDTO = {
             receita: novaReceita,
             ordem: index,
             // @ts-ignore
-            nome: file.filename,
+            nome: file.filename.replace(' ',''),
+            data: await fs.promises.readFile(file.path),
           }
           novasImagens.push(novaImagem)
         })
@@ -170,12 +171,13 @@ export default class ReceitasController {
     // @ts-ignore
     if (files && files.length > 0) {
       // @ts-ignore
-      files.forEach((file, index: number) => {
+      files.forEach(async (file, index: number) => {
         const novaImagem: createImageDTO = {
           receita: receita,
           ordem: index,
           // @ts-ignore
-          nome: file.filename,
+          nome: file.filename.replace(' ',''),
+          data: await fs.promises.readFile(file.path),
         }
         novasImagens.push(novaImagem)
       })
