@@ -39,7 +39,7 @@ routes.post('/:receitaId', async (request, response) => {
     response.status(200).json(responseComentario)
   } catch (error) {
     console.log(error)
-    response.status(200).json(error)
+    response.status(400).json(error)
   }
 })
 

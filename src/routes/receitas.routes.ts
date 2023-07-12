@@ -24,7 +24,7 @@ routes.get('/all', async (request, response) => {
     response.status(200).json(receitas)
   } catch (error) {
     console.log(error)
-    response.status(200).json(error)
+    response.status(400).json(error)
   }
 })
 
@@ -44,7 +44,7 @@ routes.get('/mine', verificaAutenticado, async (request, response) => {
     response.status(200).json(receitas)
   } catch (error) {
     console.log(error)
-    response.status(200).json(error)
+    response.status(400).json(error)
   }
 })
 
@@ -83,7 +83,7 @@ routes.get('/:id', async (request, response) => {
     response.status(200).json(receitas)
   } catch (error) {
     console.log(error)
-    response.status(200).json(error)
+    response.status(400).json(error)
   }
 })
 
