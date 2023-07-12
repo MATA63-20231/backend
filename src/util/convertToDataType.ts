@@ -34,6 +34,7 @@ const convertComentarioToResponseComentario = (comentario: Comentario) => {
     id: comentario.id,
     usuario: convertUsuarioToResponseUsuario(comentario.usuario),
     comentario: comentario.comentario,
+    respostas: comentario.respostas,
   } as unknown as comentarioUsuarioSemSenha
 }
 

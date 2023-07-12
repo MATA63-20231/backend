@@ -28,7 +28,7 @@ class Comentario {
   @Column()
   comentario: string
 
-  @OneToMany(() => Comentario, comentario => comentario.respostas, {
+  @OneToMany(() => Resposta, resposta => resposta.comentario, {
     eager: true,
     onDelete: 'CASCADE',
   })

@@ -86,9 +86,6 @@ export default class UsuarioController {
   async authenticate({ usuario, senha }: authenticateUsuaroioDTO) {
     if (!authenticator.jwt.secret) throw new Error('Secret não encontrado')
 
-    console.log(usuario)
-    console.log(senha)
-
     const user = await usuarioRepository.findOne({
       where: {
         usuario: usuario,
@@ -105,8 +102,6 @@ export default class UsuarioController {
       subject: user.id,
       expiresIn: authenticator.jwt.expiresIn,
     })
-
-    console.log(token)
 
     return {
       token: token,
