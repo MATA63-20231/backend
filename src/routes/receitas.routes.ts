@@ -48,8 +48,8 @@ routes.get('/mine', verificaAutenticado, async (request, response) => {
   }
 })
 
-routes.get('/', async (request, response) => {
-  const { titulo } = request.body
+routes.get('/:titulo', async (request, response) => {
+  const { titulo } = request.params
 
   /* eslint-disable */
   // @ts-ignore
