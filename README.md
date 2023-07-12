@@ -24,7 +24,7 @@ Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-202
    $ npm install -g yarn
    ```
 
-## Instalação
+## Instalação e Execução
 1. Dentro da pasta do projeto, fazer o download/atualização das dependências:
    ```bash
    $ yarn
@@ -57,20 +57,14 @@ Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-202
    $ yarn migration:run
    ```
 
-## Execução
-Ambiente de homologação:
-```bash
-$ yarn dev:server
-```
+5. Rode o ambiente de homologação:
+   ```bash
+   $ yarn dev:server
+   ```
 
 ## Testes
 ```bash
 $ yarn test:run
-```
- 
-## Build
-```bash
-$ yarn build 
 ```
 
 ## Lint
