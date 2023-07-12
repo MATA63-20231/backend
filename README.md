@@ -34,7 +34,7 @@ Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-202
    $ docker compose up
    ```
 
-3. Criar manualmente o arquivo **.env** e preencher as com as seguintes variáveis de ambiente: 
+3. Caso utilize um outro banco de dados, edite o arquivo **.env** na raíz do projeto, contendo as seguintes variáveis de ambiente:
     * `DB_HOST` (Host de acesso ao banco de dados)
     * `DB_PORT` (Porta de acesso ao banco de dados)
     * `DB_USER` (Usuário do banco de dados)
