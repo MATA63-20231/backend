@@ -10,7 +10,7 @@ routes.get('/:imagemId', async (request, response) => {
   try {
     const responseImagem = await imagensControler.obter(imagemId)
 
-    response.status(200).download(responseImagem)
+    response.status(200).send(responseImagem)
   } catch (error) {
     console.log(error)
     response.status(400).json(error)

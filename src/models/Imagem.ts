@@ -21,4 +21,7 @@ export default class Imagem {
   @ManyToOne(() => Receita, receita => receita.imagens, { cascade: true })
   @JoinColumn({ name: 'receita_id' })
   receita: Receita
+
+  @Column('mediumblob')
+  data: Buffer;
 }

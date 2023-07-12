@@ -32,6 +32,7 @@ export type createImageDTO = {
   receita: Receita
   ordem: number
   nome: string
+  data: Buffer
 }
 
 export type usuarioSemSenha = Omit<Usuario, 'senha'>
