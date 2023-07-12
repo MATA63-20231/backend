@@ -43,14 +43,14 @@ Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-202
     * `PORT` (Porta de acesso da aplicação)
 
     Segue opção de **.env** default
-    ```DB_HOST=localhost
-    DB_PORT=3306
-    DB_USER=chef-virtual
-    DB_PASSWORD=chef-virtual
-    DB_NAME=chef-virtual 
     ```
-
-PORT=3000
+      DB_HOST=localhost
+      DB_PORT=3306
+      DB_USER=chef-virtual
+      DB_PASSWORD=chef-virtual
+      DB_NAME=chef-virtual
+      PORT=3000
+    ```
   
 4. Execução das migrations:
    ```bash
