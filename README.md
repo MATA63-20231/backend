@@ -24,7 +24,7 @@ Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-202
    $ npm install -g yarn
    ```
 
-## Instalação
+## Instalação e Execução
 1. Dentro da pasta do projeto, fazer o download/atualização das dependências:
    ```bash
    $ yarn
@@ -34,43 +34,29 @@ Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-202
    $ docker compose up
    ```
 
-3. Criar manualmente o arquivo **.env** e preencher as com as seguintes variáveis de ambiente: 
-    * `DB_HOST` (Host de acesso ao banco de dados)
-    * `DB_PORT` (Porta de acesso ao banco de dados)
-    * `DB_USER` (Usuário do banco de dados)
-    * `DB_PASSWORD` (Senha do banco de dados)
-    * `DB_NAME` (Nome do schema no banco de dados)
-    * `PORT` (Porta de acesso da aplicação)
-
-    Segue opção de **.env** default
-    ```DB_HOST=localhost
+3. Acrecsente um arquivo **.env** na raíz do projeto, contendo as seguintes variáveis de ambiente:
+    ```
+    DB_HOST=localhost
     DB_PORT=3306
     DB_USER=chef-virtual
     DB_PASSWORD=chef-virtual
-    DB_NAME=chef-virtual 
+    DB_NAME=chef-virtual
+    PORT=3000
     ```
-
-PORT=3000
   
 4. Execução das migrations:
    ```bash
    $ yarn migration:run
    ```
 
-## Execução
-Ambiente de homologação:
-```bash
-$ yarn dev:server
-```
+5. Rode o ambiente de homologação:
+   ```bash
+   $ yarn dev:server
+   ```
 
 ## Testes
 ```bash
 $ yarn test:run
-```
- 
-## Build
-```bash
-$ yarn build 
 ```
 
 ## Lint

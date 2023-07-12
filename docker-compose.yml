@@ -1,0 +1,21 @@
+version: '3'
+services:
+  db:
+    image: mysql:5.7
+    hostname: chef-virtual-database
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=chef-virtual
+      - MYSQL_USER=chef-virtual
+      - MYSQL_PASSWORD=chef-virtual
+      - MYSQL_DATABASE=chef-virtual
+    expose:
+      - 3306
+    networks:
+      - chef-virtual-network
+
+networks:
+  chef-virtual-network:
+    driver: bridge
