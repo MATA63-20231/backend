@@ -48,7 +48,7 @@ routes.get('/mine', verificaAutenticado, async (request, response) => {
   }
 })
 
-routes.get('/:titulo', async (request, response) => {
+routes.get('/busca/:titulo', async (request, response) => {
   const { titulo } = request.params
 
   /* eslint-disable */
