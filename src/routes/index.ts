@@ -7,6 +7,9 @@ import comentariosRouter from '../routes/comentarios.routes'
 
 const routes = Router()
 
+routes.get('/', function( req, resp) {
+    resp.send("ONLINE");
+})
 routes.use('/receita', receitasRouter)
 routes.use('/usuario', usuariosRouter)
 routes.use('/imagem', imagensRouter)

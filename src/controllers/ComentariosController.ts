@@ -3,6 +3,17 @@ import usuariosRepository from '../repositories/usuariosRepository'
 import receitasRepository from '../repositories/receitasRepository'
 import comentariosRepository from '../repositories/comentariosRepository'
 
+import * as yup from 'yup'
+import { ReceitaIdValidate } from '../validates/receitas/index'
+import { 
+  ComentarioValidate,
+  ComentarioIdValidate,
+} from '../validates/comentarios'
+
+const receitaIdSchema = ReceitaIdValidate;
+const comentarioSchema = ComentarioValidate;
+const comentarioIdSchema = ComentarioIdValidate;
+
 const usuarioId = '9f4afde4-63dd-4565-ad94-f7bfdd1218a6'
 
 export default class CurtidasController {
@@ -11,17 +22,9 @@ export default class CurtidasController {
       const { receitaId } = request.params
       const { comentario } = request.body
 
-      //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-      if (!receitaId)
-        return response
-          .status(400)
-          .json({ message: 'É obrigatório indicar a receita' })
-
-      if (!comentario)
-        return response
-          .status(400)
-          .json({ message: 'É obrigatório incluir um comentário' })
-
+      await receitaIdSchema.validate({ receitaId: receitaId }, { strict: true})
+      await comentarioSchema.validate({ comentario: comentario }, { strict: true})
+      
       const receita = await receitasRepository
         .createQueryBuilder('receita')
         .where('id = :id', { id: receitaId })
@@ -52,6 +55,10 @@ export default class CurtidasController {
       await comentariosRepository.save(novoComentario)
       return response.status(200).json({ message: 'Comentário incluido' })
     } catch (error) {
+      if(error instanceof yup.ValidationError) {
+        return response.status(400).json({ error: error.errors.join(', ')})
+      }
+
       return response.status(400).json({ Error: error })
     }
   }
@@ -61,17 +68,9 @@ export default class CurtidasController {
       const { comentarioId } = request.params
       const { comentario } = request.body
 
-      //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-      if (!comentarioId)
-        return response
-          .status(400)
-          .json({ message: 'É obrigatório indicar o comentário respondido' })
-
-      if (!comentario)
-        return response
-          .status(400)
-          .json({ message: 'É obrigatório incluir um comentário' })
-
+      await comentarioIdSchema.validate({ comentarioId: comentarioId }, { strict: true})
+      await comentarioSchema.validate({ comentario: comentario }, { strict: true})
+      
       const usuario = await usuariosRepository
         .createQueryBuilder('usuario')
         .where('id = :id', { id: usuarioId })
@@ -107,6 +106,9 @@ export default class CurtidasController {
       await comentariosRepository.save(novoComentario)
       return response.status(200).json({ message: 'Comentário respondido' })
     } catch (error) {
+      if(error instanceof yup.ValidationError) {
+        return response.status(400).json({ error: error.errors.join(', ')})
+      }
       return response.status(400).json({ Error: error })
     }
   }
@@ -116,16 +118,8 @@ export default class CurtidasController {
       const { comentarioId } = request.params
       const { comentario } = request.body
 
-      //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-      if (!comentarioId)
-        return response
-          .status(400)
-          .json({ message: 'É obrigatório indicar o comentário alterado' })
-
-      if (!comentario)
-        return response
-          .status(400)
-          .json({ message: 'É obrigatório incluir um comentário' })
+      await comentarioIdSchema.validate({ comentarioId: comentarioId }, { strict: true})
+      await comentarioSchema.validate({ comentario: comentario }, { strict: true})  
 
       const comentarioAlterado = await comentariosRepository.findOne({
         where: { id: comentarioId },
@@ -150,7 +144,9 @@ export default class CurtidasController {
 
       return response.status(200).json({ message: 'Comentário alterado' })
     } catch (error) {
-      console.log(error)
+      if(error instanceof yup.ValidationError) {
+        return response.status(400).json({ error: error.errors.join(', ')})
+      }
       return response.status(400).json({ Error: error })
     }
   }
@@ -159,11 +155,7 @@ export default class CurtidasController {
     try {
       const { comentarioId } = request.params
 
-      //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-      if (!comentarioId)
-        return response
-          .status(400)
-          .json({ message: 'É obrigatório indicar o comentário' })
+      await comentarioIdSchema.validate({ comentarioId: comentarioId }, { strict: true})
 
       const comentario = await comentariosRepository
         .createQueryBuilder('comentario')
@@ -205,7 +197,9 @@ export default class CurtidasController {
 
       return response.status(201).json({ message: 'Comentário removida' })
     } catch (error) {
-      console.log(error)
+      if(error instanceof yup.ValidationError) {
+        return response.status(400).json({ error: error.errors.join(', ')})
+      }
       return response.status(400).json({ Error: error })
     }
   }
@@ -213,13 +207,8 @@ export default class CurtidasController {
   async listarRespostas(request: Request, response: Response) {
     try {
       const { comentarioId } = request.params
-
-      //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-      if (!comentarioId)
-        return response
-          .status(400)
-          .json({ message: 'É obrigatório indicar o comentário' })
-
+      await comentarioIdSchema.validate({ comentarioId: comentarioId }, { strict: true})
+      
       const comentarioPai = await comentariosRepository.findOne({
         where: { id: comentarioId },
       })
@@ -242,6 +231,9 @@ export default class CurtidasController {
 
       return response.status(201).json(comentariosFilhos)
     } catch (error) {
+      if(error instanceof yup.ValidationError) {
+        return response.status(400).json({ error: error.errors.join(', ')})
+      }
       return response.status(400).json({ Error: error })
     }
   }

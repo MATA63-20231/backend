@@ -4,6 +4,19 @@ import ingredientesRepository from '../repositories/ingredientesRepository'
 import Receita from '../models/Receita'
 import preparoRepository from '../repositories/preparoRepository'
 import imagensRepository from '../repositories/imagensRepository'
+import * as yup from "yup"
+
+import {
+  CreateValidate,
+  UpdateValidate,
+  IdValidate,
+  TituloValidate,
+} from "../validates/receitas/index"
+
+const createSchema  = CreateValidate;
+const updateSchema  = UpdateValidate;
+const idSchema      = IdValidate;
+const tituloSchema  = TituloValidate;
 
 import {
   createReceitaMultDTO,
@@ -24,6 +37,11 @@ const usuarioId = '9f4afde4-63dd-4565-ad94-f7bfdd1218a6'
 export default class ReceitasController {
   async create(request: Request, response: Response) {
     try {
+      const reqReceita = request.body
+      await createSchema.validate(
+        reqReceita, { strict: true }
+      );
+
       const {
         titulo,
         descricao,
@@ -31,25 +49,17 @@ export default class ReceitasController {
         tempoPreparo,
         listaPreparo,
         ingredientes,
-      }: createReceitaMultDTO = request.body
-
-      //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-      if (!titulo)
-        return response.status(400).json({ message: 'O título é obrigatório.' })
+      } = reqReceita;
 
       const listaIngredientes =
         typeof ingredientes == 'string'
           ? JSON.parse(ingredientes)
           : ingredientes
+     
       if (!listaIngredientes || listaIngredientes.length < 1)
         return response
           .status(400)
           .json({ message: 'Cadastro de ingredientes é obrigatório.' })
-
-      if (!rendimento || rendimento == 0)
-        return response
-          .status(400)
-          .json({ message: 'O rendimento deve ser superior a 0.' })
 
       const tempo: { minutos: number; horas: number } =
         typeof tempoPreparo == 'string'
@@ -160,6 +170,10 @@ export default class ReceitasController {
 
       return response.status(201).json(responseReceita)
     } catch (error) {
+      if(error instanceof yup.ValidationError) {
+        return response.status(400).json( { 
+          error: error.errors.join(', ') } )
+      }
       return response.status(400).json({ Error: JSON.stringify(error) })
     }
   }
@@ -174,16 +188,18 @@ export default class ReceitasController {
         tempoPreparo,
         listaPreparo,
         ingredientes,
-      }: createReceitaMultDTO = request.body
-
-      if (!receitaId)
-        return response
-          .status(400)
-          .json({ message: 'Id da receita não informado.' })
-
-      //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-      if (!titulo)
-        return response.status(400).json({ message: 'O título é obrigatório.' })
+      } = request.body
+      
+      await updateSchema.validate({
+        titulo,
+        descricao,
+        rendimento,
+        tempoPreparo,
+        listaPreparo,
+        ingredientes,
+        receitaId
+      }, { strict: true }
+      );
 
       const listaIngredientes =
         typeof ingredientes == 'string'
@@ -308,6 +324,10 @@ export default class ReceitasController {
 
       return response.status(201).json(responseReceita)
     } catch (error) {
+      if(error instanceof yup.ValidationError) {
+        return response.status(400).json({ error: error.errors.join(', ') })
+      }
+
       return response.status(400).json({ Error: JSON.stringify(error) })
     }
   }
@@ -335,7 +355,8 @@ export default class ReceitasController {
   async findByTitulo(request: Request, response: Response) {
     try {
       const { titulo } = request.body
-
+      await tituloSchema.validate({titulo}, { strict: true })
+      
       const receitas = await receitasRepository.find({
         where: { titulo: Like(`%${titulo}%`) },
       })
@@ -360,6 +381,7 @@ export default class ReceitasController {
   async findById(request: Request, response: Response) {
     try {
       const { id } = request.params
+      await idSchema.validate({id}, { strict: true })
 
       const receita = await receitasRepository.findOne({ where: { id } })
 
@@ -378,6 +400,7 @@ export default class ReceitasController {
   async delete(request: Request, response: Response) {
     try {
       const { id } = request.params
+      await idSchema.validate({id}, { strict: true })
 
       const receita: Receita | null = await receitasRepository.findOne({
         where: { id },
