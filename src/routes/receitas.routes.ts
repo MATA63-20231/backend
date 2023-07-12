@@ -5,6 +5,19 @@ import { storage } from '../config/multer'
 import verificaAutenticado from '../middlewares/verificaAutenticado'
 import verificaUsuarioAtual from '../middlewares/verificaUsuarioAtual'
 
+import * as yup from 'yup'
+import {
+  TituloValidate,
+  ReceitaIdValidate,
+  IdValidate,
+  CreateValidate
+} from '../validates/receitas'
+
+const tituloSchema = TituloValidate
+const receitaIdSchema = ReceitaIdValidate
+const idSchema = IdValidate
+const createSchema = CreateValidate
+
 const upload = multer(storage)
 
 const routes = Router()
@@ -51,6 +64,7 @@ routes.get('/mine', verificaAutenticado, async (request, response) => {
 routes.get('/busca/:titulo', async (request, response) => {
   const { titulo } = request.params
 
+  await tituloSchema.validate({ titulo }, { strict: true })
   /* eslint-disable */
   // @ts-ignore
   const usuarioId = request.usuario?.id
@@ -63,14 +77,16 @@ routes.get('/busca/:titulo', async (request, response) => {
 
     response.status(200).json(receitas)
   } catch (error) {
-    console.log(error)
+    if (error instanceof yup.ValidationError) {
+      response.status(400).json(error.errors.join(', '))
+    }
     response.status(400).json(error)
   }
 })
 
 routes.get('/:id', async (request, response) => {
   const { id } = request.params
-
+  await idSchema.validate({ id }, { strict: true })
   /* eslint-disable */
   // @ts-ignore
   const usuarioId = request.usuario?.id
@@ -82,7 +98,9 @@ routes.get('/:id', async (request, response) => {
     const receitas = await receitasController.findById(id, usuarioId)
     response.status(200).json(receitas)
   } catch (error) {
-    console.log(error)
+    if (error instanceof yup.ValidationError) {
+      response.status(400).json(error.errors.join(', '))
+    }
     response.status(400).json(error)
   }
 })
@@ -103,6 +121,14 @@ routes.post(
       ingredientes,
     } = request.body
 
+    await createSchema.validate({
+      titulo,
+      descricao,
+      rendimento,
+      tempoPreparo,
+      listaPreparo,
+      ingredientes,
+    }, { strict: true })
     /* eslint-disable */
     // @ts-ignore
     const usuario = request.usuario
@@ -110,9 +136,6 @@ routes.post(
 
     if (!usuario)
       return response.status(401).json({ message: 'Usuário não autorizado.' })
-
-    if (!titulo)
-      return response.status(400).json({ message: 'O título é obrigatório.' })
 
     const listaIngredientes =
       typeof ingredientes == 'string' ? JSON.parse(ingredientes) : ingredientes
@@ -178,6 +201,9 @@ routes.post(
       })
       response.status(200).json(receitas)
     } catch (error) {
+      if (error instanceof yup.ValidationError) {
+        response.status(400).json(error.errors.join(', '))
+      }
       console.log(error)
       response.status(400).json({ error: 'Falha na inclusão da receita' })
     }
@@ -202,7 +228,8 @@ routes.put(
     } = request.body
 
     const { receitaId } = request.params
-
+    await receitaIdSchema.validate({ receitaId }, { strict: true })
+    await tituloSchema.validate({ titulo }, { strict: true })
     /* eslint-disable */
     // @ts-ignore
     const usuario = request.usuario
@@ -210,9 +237,6 @@ routes.put(
 
     if (!usuario)
       return response.status(401).json({ message: 'Usuário não autorizado.' })
-
-    if (!titulo)
-      return response.status(400).json({ message: 'O título é obrigatório.' })
 
     const listaIngredientes =
       typeof ingredientes == 'string' ? JSON.parse(ingredientes) : ingredientes
@@ -279,6 +303,9 @@ routes.put(
       })
       response.status(200).json(receitas)
     } catch (error) {
+      if (error instanceof yup.ValidationError) {
+        response.status(400).json(error.errors.join(', '))
+      }
       console.log(error)
       response.status(400).json(error)
     }
@@ -288,7 +315,7 @@ routes.put(
 
 routes.delete('/:id', async (request, response) => {
   const { id } = request.params
-
+  await idSchema.validate({ id }, { strict: true }) // Validação do id
   const receitasControler = new ReceitasController()
 
   try {
@@ -296,6 +323,9 @@ routes.delete('/:id', async (request, response) => {
 
     response.status(200).json(responseDelete)
   } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      response.status(400).json(error.errors.join(', '))
+    }
     console.log(error)
     response.status(400).json(error)
   }

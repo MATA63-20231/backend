@@ -2,6 +2,17 @@ import { Router } from 'express'
 import ComentariosController from '../controllers/ComentariosController'
 import verificaAutenticado from '../middlewares/verificaAutenticado'
 
+import * as yup from 'yup'
+import { 
+  ComentarioValidate,
+  ComentarioIdValidate,
+} from '../validates/comentarios'
+import { ReceitaIdValidate } from '../validates/receitas'
+
+const comentariosSchema = ComentarioValidate;
+const comentarioIdSchema = ComentarioIdValidate;
+const receitaIdSchema   = ReceitaIdValidate;
+
 const routes = Router()
 
 routes.use(verificaAutenticado)
@@ -10,6 +21,9 @@ routes.post('/:receitaId', async (request, response) => {
   const { receitaId } = request.params
   const { comentario } = request.body
 
+  await receitaIdSchema.validate({ receitaId }, {strict: true})
+  await comentariosSchema.validate({ comentario }, {strict: true})
+
   /* eslint-disable */
   // @ts-ignore
   const usuarioId = request.usuario?.id
@@ -17,16 +31,6 @@ routes.post('/:receitaId', async (request, response) => {
 
   if (!usuarioId)
     return response.status(401).json({ message: 'Usuário não autorizado.' })
-  //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-  if (!receitaId)
-    return response
-      .status(400)
-      .json({ message: 'É obrigatório indicar a receita' })
-
-  if (!comentario)
-    return response
-      .status(400)
-      .json({ message: 'É obrigatório incluir um comentário' })
 
   const comentariosController = new ComentariosController()
 
@@ -38,7 +42,9 @@ routes.post('/:receitaId', async (request, response) => {
     )
     response.status(200).json(responseComentario)
   } catch (error) {
-    console.log(error)
+    if(error instanceof yup.ValidationError){
+      response.status(400).json(error.errors.join(', '))
+    }
     response.status(400).json(error)
   }
 })
@@ -47,6 +53,9 @@ routes.put('/:comentarioId', async (request, response) => {
   const { comentarioId } = request.params
   const { comentario } = request.body
 
+  await comentarioIdSchema.validate({ comentarioId }, {strict: true})
+  await comentariosSchema.validate({ comentario }, {strict: true})
+
   /* eslint-disable */
   // @ts-ignore
   const usuarioId = request.usuario?.id
@@ -54,17 +63,6 @@ routes.put('/:comentarioId', async (request, response) => {
 
   if (!usuarioId)
     return response.status(401).json({ message: 'Usuário não autorizado.' })
-
-  //To-do: Incluir yup para tratamento dos campos obrigatórios de formulário
-  if (!comentarioId)
-    return response
-      .status(400)
-      .json({ message: 'É obrigatório indicar o comentário alterado' })
-
-  if (!comentario)
-    return response
-      .status(400)
-      .json({ message: 'É obrigatório incluir um comentário' })
 
   const comentariosController = new ComentariosController()
 
@@ -76,13 +74,16 @@ routes.put('/:comentarioId', async (request, response) => {
     )
     response.status(200).json(responseComentario)
   } catch (error) {
-    console.log(error)
+    if (error instanceof yup.ValidationError) {
+      response.status(400).json(error.errors.join(', '))
+    }
     response.status(400).json(error)
   }
 })
 
 routes.delete('/:comentarioId', async (request, response) => {
   const { comentarioId } = request.params
+  await comentarioIdSchema.validate({ comentarioId }, {strict: true})
 
   /* eslint-disable */
   // @ts-ignore
@@ -94,11 +95,6 @@ routes.delete('/:comentarioId', async (request, response) => {
 
   const comentariosController = new ComentariosController()
 
-  if (!comentarioId)
-    return response
-      .status(400)
-      .json({ message: 'É obrigatório indicar o comentário alterado' })
-
   try {
     const responseComentario = await comentariosController.delete(
       comentarioId,
@@ -106,7 +102,9 @@ routes.delete('/:comentarioId', async (request, response) => {
     )
     response.status(200).json(responseComentario)
   } catch (error) {
-    console.log(error)
+    if(error instanceof yup.ValidationError){
+      response.status(400).json(error.errors.join(', '))
+    }
     response.status(400).json(error)
   }
 })
