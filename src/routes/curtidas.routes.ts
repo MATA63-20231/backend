@@ -4,7 +4,9 @@ import verificaAutenticado from '../middlewares/verificaAutenticado'
 
 const routes = Router()
 
-routes.post('/:receitaId', verificaAutenticado, async (request, response) => {
+routes.use(verificaAutenticado)
+
+routes.post('/:receitaId', async (request, response) => {
   const { receitaId } = request.params
   const { curtida }: { curtida: boolean } = request.body
   /* eslint-disable */
@@ -42,7 +44,7 @@ routes.post('/:receitaId', verificaAutenticado, async (request, response) => {
   }
 })
 
-routes.delete('/:receitaId', verificaAutenticado, async (request, response) => {
+routes.delete('/:receitaId', async (request, response) => {
   const { receitaId } = request.params
   /* eslint-disable */
   // @ts-ignore
