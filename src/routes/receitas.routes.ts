@@ -64,7 +64,7 @@ routes.get('/', async (request, response) => {
     response.status(200).json(receitas)
   } catch (error) {
     console.log(error)
-    response.status(200).json(error)
+    response.status(400).json(error)
   }
 })
 
