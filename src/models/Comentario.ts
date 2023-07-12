@@ -8,6 +8,7 @@ import {
 } from 'typeorm'
 import Receita from './Receita'
 import Usuario from './Usuario'
+import Resposta from './Resposta'
 
 @Entity('comentario')
 class Comentario {
@@ -27,22 +28,11 @@ class Comentario {
   @Column()
   comentario: string
 
-  @ManyToOne(() => Comentario, comentario => comentario.respostas, {
-    cascade: true,
-  })
-  @JoinColumn({ name: 'comentario_pai' })
-  comentarioPai: Comentario
-
-  @OneToMany(() => Comentario, comentario => comentario.receita, {
+  @OneToMany(() => Comentario, comentario => comentario.respostas, {
+    eager: true,
     onDelete: 'CASCADE',
   })
-  respostas: Comentario[]
-
-  @Column('boolean')
-  temResposta: boolean
-
-  @Column('boolean')
-  principal: boolean
+  respostas: Resposta[]
 }
 
 export default Comentario
