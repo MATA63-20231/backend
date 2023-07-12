@@ -34,22 +34,14 @@ Para informações gerais sobre o sistema, acesse: https://github.com/MATA63-202
    $ docker compose up
    ```
 
-3. Caso utilize um outro banco de dados, edite o arquivo **.env** na raíz do projeto, contendo as seguintes variáveis de ambiente:
-    * `DB_HOST` (Host de acesso ao banco de dados)
-    * `DB_PORT` (Porta de acesso ao banco de dados)
-    * `DB_USER` (Usuário do banco de dados)
-    * `DB_PASSWORD` (Senha do banco de dados)
-    * `DB_NAME` (Nome do schema no banco de dados)
-    * `PORT` (Porta de acesso da aplicação)
-
-    Segue opção de **.env** default
+3. Acrecsente um arquivo **.env** na raíz do projeto, contendo as seguintes variáveis de ambiente:
     ```
-      DB_HOST=localhost
-      DB_PORT=3306
-      DB_USER=chef-virtual
-      DB_PASSWORD=chef-virtual
-      DB_NAME=chef-virtual
-      PORT=3000
+    DB_HOST=localhost
+    DB_PORT=3306
+    DB_USER=chef-virtual
+    DB_PASSWORD=chef-virtual
+    DB_NAME=chef-virtual
+    PORT=3000
     ```
   
 4. Execução das migrations:
