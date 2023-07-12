@@ -20,6 +20,26 @@ routes.get('/all', async (request, response) => {
   }
 })
 
+routes.get('/mine', verificaAutenticado, async (request, response) => {
+  /* eslint-disable */
+  // @ts-ignore
+  const usuarioId = request.usuario?.id
+  /* eslint-enable */
+
+  if (!usuarioId)
+    return response.status(401).json({ message: 'Usuário não autorizado.' })
+
+  const receitasControler = new ReceitasController()
+
+  try {
+    const receitas = await receitasControler.findMine(usuarioId)
+    response.status(200).json(receitas)
+  } catch (error) {
+    console.log(error)
+    response.status(200).json(error)
+  }
+})
+
 routes.get('/', async (request, response) => {
   const { titulo } = request.body
 

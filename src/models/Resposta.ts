@@ -13,7 +13,7 @@ class Resposta {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @ManyToOne(() => Usuario, { eager: true })
+  @ManyToOne(() => Usuario)
   @JoinColumn({ name: 'usuario_id' })
   usuario: Usuario
 

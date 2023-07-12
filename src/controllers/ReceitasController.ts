@@ -249,6 +249,25 @@ export default class ReceitasController {
     }
   }
 
+  async findMine(usuarioId: string) {
+    const receitas = await receitasRepository
+      .createQueryBuilder('receita')
+      .where('receita.usuario.id = :id', { id: usuarioId })
+      .getMany()
+
+    if (receitas) {
+      const receitasResponse: Receita[] = []
+
+      receitas.forEach(receita => {
+        return receitasResponse.push(receita)
+      })
+
+      return receitasResponse
+    } else {
+      return []
+    }
+  }
+
   async findByTitulo(titulo: string) {
     const receitas = await receitasRepository.find({
       where: { titulo: Like(`%${titulo}%`) },
