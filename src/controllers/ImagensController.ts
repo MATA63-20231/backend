@@ -13,7 +13,7 @@ export default class ImagensController {
 
       if (!imagem) throw new Error('Imagem não encontrada')
 
-      return `${pathImage}\\${imagem.nome}`
+      return `${pathImage}/${imagem.nome}`
     } catch (error) {
       console.log(error)
       throw new Error('Falha ao salvar imagem')
