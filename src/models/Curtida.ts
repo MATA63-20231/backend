@@ -13,7 +13,7 @@ class Curtida {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @ManyToOne(() => Usuario)
+  @ManyToOne(() => Usuario, { eager: true })
   @JoinColumn({ name: 'usuario_id' })
   usuario: Usuario
 

@@ -10,25 +10,20 @@ type TokenPayload = {
   permissoes: []
 }
 
-export default function verificaAutenticado(
+export default function verificaUsuarioAtual(
   request: Request,
   response: Response,
   next: NextFunction
 ) {
   const authHeader = request.headers.authorization
 
-  if (!authHeader)
-    return response.status(400).json({
-      message: 'Token não encontrado',
-    })
+  if (!authHeader) return next()
 
   const [, token] = authHeader.split(' ')
 
   try {
     if (!authenticator.jwt.secret) {
-      return response.status(400).json({
-        message: 'Secret não encontrado',
-      })
+      return next()
     }
 
     const decoded = verify(token, authenticator.jwt.secret)
@@ -41,9 +36,7 @@ export default function verificaAutenticado(
     /*eslint-enable*/
   } catch (error) {
     console.log(error)
-    return response.status(400).json({
-      message: 'Token inválido',
-    })
+    return next()
   }
 
   next()

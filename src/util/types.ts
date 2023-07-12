@@ -1,8 +1,13 @@
 import Comentario from '../models/Comentario'
+import Curtida from '../models/Curtida'
 import Ingrediente from '../models/Ingrediente'
 import Preparo from '../models/Preparo'
 import Receita from '../models/Receita'
 import Usuario from '../models/Usuario'
+
+export type curtidaReponse = Omit<Omit<Curtida, 'usuario'>, 'receita'> & {
+  usuario: usuarioSemSenha
+}
 
 export type createReceitaDTO = Omit<Omit<Receita, 'id'>, 'tempoPreparo'> & {
   tempoPreparo: {
@@ -35,8 +40,8 @@ export type comentarioUsuarioSemSenha = Omit<Comentario, 'usuario'> &
   usuarioSemSenha
 
 export type responseReceitaDTO = Omit<
-  Omit<Omit<Receita, 'tempoPreparo'>, 'comentarios'>,
-  'usuario'
+  Omit<Omit<Omit<Receita, 'tempoPreparo'>, 'comentarios'>, 'usuario'>,
+  'curtidas'
 > & {
   tempoPreparo: {
     horas: number
@@ -44,6 +49,11 @@ export type responseReceitaDTO = Omit<
   }
   comentarios: comentarioUsuarioSemSenha[]
   usuario: usuarioSemSenha
+  curtidas: curtidaReponse[]
+  minhaCurtida: boolean | undefined
+  totalCurtidas: number
+  totalLikes: number
+  totalDislikes: number
 }
 
 export type fileType = {

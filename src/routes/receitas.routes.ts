@@ -3,16 +3,24 @@ import ReceitasController from '../controllers/ReceitasController'
 import multer from 'multer'
 import { storage } from '../config/multer'
 import verificaAutenticado from '../middlewares/verificaAutenticado'
+import verificaUsuarioAtual from '../middlewares/verificaUsuarioAtual'
 
 const upload = multer(storage)
 
 const routes = Router()
 
+routes.use(verificaUsuarioAtual)
+
 routes.get('/all', async (request, response) => {
   const receitasControler = new ReceitasController()
 
+  /* eslint-disable */
+  // @ts-ignore
+  const usuarioId = request.usuario?.id
+  /* eslint-enable */
+
   try {
-    const receitas = await receitasControler.findAll()
+    const receitas = await receitasControler.findAll(usuarioId)
     response.status(200).json(receitas)
   } catch (error) {
     console.log(error)
@@ -43,10 +51,15 @@ routes.get('/mine', verificaAutenticado, async (request, response) => {
 routes.get('/', async (request, response) => {
   const { titulo } = request.body
 
+  /* eslint-disable */
+  // @ts-ignore
+  const usuarioId = request.usuario?.id
+  /* eslint-enable */
+
   const receitasController = new ReceitasController()
 
   try {
-    const receitas = await receitasController.findByTitulo(titulo)
+    const receitas = await receitasController.findByTitulo(titulo, usuarioId)
 
     response.status(200).json(receitas)
   } catch (error) {
@@ -58,10 +71,15 @@ routes.get('/', async (request, response) => {
 routes.get('/:id', async (request, response) => {
   const { id } = request.params
 
+  /* eslint-disable */
+  // @ts-ignore
+  const usuarioId = request.usuario?.id
+  /* eslint-enable */
+
   const receitasController = new ReceitasController()
 
   try {
-    const receitas = await receitasController.findById(id)
+    const receitas = await receitasController.findById(id, usuarioId)
     response.status(200).json(receitas)
   } catch (error) {
     console.log(error)

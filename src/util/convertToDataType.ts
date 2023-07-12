@@ -1,4 +1,5 @@
 import Comentario from '../models/Comentario'
+import Curtida from '../models/Curtida'
 import Receita from '../models/Receita'
 import Usuario from '../models/Usuario'
 
@@ -6,6 +7,7 @@ import {
   comentarioUsuarioSemSenha,
   responseReceitaDTO,
   usuarioSemSenha,
+  curtidaReponse,
 } from '../util/types'
 
 export const convertUsuarioToResponseUsuario = (usuario: Usuario) => {
@@ -15,6 +17,22 @@ export const convertUsuarioToResponseUsuario = (usuario: Usuario) => {
     nome: usuario.nome,
     email: usuario.email,
   } as usuarioSemSenha
+}
+
+const converterListaCurtidaToListaResponseCurtida = (curtidas: Curtida[]) => {
+  let listaReponseCurtida: curtidaReponse[] = [] // eslint-disable-line
+  curtidas.forEach(curtida => {
+    listaReponseCurtida.push(convertCurtidaToResponseCurtida(curtida))
+  })
+  return listaReponseCurtida
+}
+
+export const convertCurtidaToResponseCurtida = (curtida: Curtida) => {
+  return {
+    id: curtida.id,
+    curtida: curtida.curtida,
+    usuario: convertUsuarioToResponseUsuario(curtida.usuario),
+  } as curtidaReponse
 }
 
 const converterListaComentarioToListaResponseComentario = (
@@ -38,7 +56,10 @@ const convertComentarioToResponseComentario = (comentario: Comentario) => {
   } as unknown as comentarioUsuarioSemSenha
 }
 
-export const convertReceitaToResponseReceita = (receita: Receita) => {
+export const convertReceitaToResponseReceita = (
+  receita: Receita,
+  usuarioId: string | undefined
+) => {
   const tempoPreparoHora = (receita.tempoPreparo / 60) | 0
 
   const tempoPreparoMinuto = receita.tempoPreparo % 60 | 0
@@ -46,6 +67,16 @@ export const convertReceitaToResponseReceita = (receita: Receita) => {
   const tempoPreparo = {
     horas: tempoPreparoHora,
     minutos: tempoPreparoMinuto,
+  }
+
+  let totalLikes = 0
+  let totalDislikes = 0
+  let minhaCurtida: boolean | undefined
+  for (const curtida of receita.curtidas) {
+    if (curtida.usuario && curtida.usuario.id == usuarioId)
+      minhaCurtida = curtida.curtida
+    if (curtida.curtida) totalLikes++
+    else totalDislikes++
   }
 
   const responseReceita: responseReceitaDTO = {
@@ -59,7 +90,11 @@ export const convertReceitaToResponseReceita = (receita: Receita) => {
     imagens: receita.imagens,
     dataCadastro: receita.dataCadastro,
     usuario: convertUsuarioToResponseUsuario(receita.usuario),
-    curtidas: receita.curtidas,
+    curtidas: converterListaCurtidaToListaResponseCurtida(receita.curtidas),
+    minhaCurtida: minhaCurtida,
+    totalCurtidas: receita.curtidas.length,
+    totalLikes: totalLikes,
+    totalDislikes: totalDislikes,
     comentarios: converterListaComentarioToListaResponseComentario(
       receita.comentarios
     ),

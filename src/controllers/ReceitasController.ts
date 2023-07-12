@@ -98,7 +98,7 @@ export default class ReceitasController {
           where: { id: receitaSalva.id },
         })
         if (responseReceita)
-          return convertReceitaToResponseReceita(responseReceita)
+          return convertReceitaToResponseReceita(responseReceita, usuario.id)
       }
 
       throw new Error('Falha na inclusão da receita')
@@ -224,7 +224,7 @@ export default class ReceitasController {
           where: { id: novaReceitaAlterada.id },
         })
         if (responseReceita)
-          return convertReceitaToResponseReceita(responseReceita)
+          return convertReceitaToResponseReceita(responseReceita, usuario.id)
       }
       throw new Error('Falha na alteração da receita')
     } catch (error) {
@@ -233,14 +233,16 @@ export default class ReceitasController {
     }
   }
 
-  async findAll() {
+  async findAll(usuarioId: string | undefined) {
     const receitas = await receitasRepository.find()
 
     if (receitas) {
       const receitasResponse: responseReceitaDTO[] = []
 
       receitas.forEach(receita => {
-        return receitasResponse.push(convertReceitaToResponseReceita(receita))
+        return receitasResponse.push(
+          convertReceitaToResponseReceita(receita, usuarioId)
+        )
       })
 
       return receitasResponse
@@ -268,7 +270,7 @@ export default class ReceitasController {
     }
   }
 
-  async findByTitulo(titulo: string) {
+  async findByTitulo(titulo: string, usuarioId: string | undefined) {
     const receitas = await receitasRepository.find({
       where: { titulo: Like(`%${titulo}%`) },
     })
@@ -277,7 +279,9 @@ export default class ReceitasController {
       const receitasResponse: responseReceitaDTO[] = []
 
       receitas.forEach(receita => {
-        return receitasResponse.push(convertReceitaToResponseReceita(receita))
+        return receitasResponse.push(
+          convertReceitaToResponseReceita(receita, usuarioId)
+        )
       })
 
       return receitasResponse
@@ -286,13 +290,16 @@ export default class ReceitasController {
     }
   }
 
-  async findById(id: string) {
+  async findById(id: string, usuarioId: string | undefined) {
     try {
       const receita = await receitasRepository.findOne({ where: { id } })
 
       if (!receita) throw new Error('Registro não encontrado.')
 
-      const responseReceita = convertReceitaToResponseReceita(receita)
+      const responseReceita = convertReceitaToResponseReceita(
+        receita,
+        usuarioId
+      )
 
       return responseReceita
     } catch (error) {
